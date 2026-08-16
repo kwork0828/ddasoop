@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>따숲 - 하루 3분, 마음이 따숲</title>
+  <meta name="description" content="지친 부모를 위한 하루 3분 홈코칭. 체크 4개만 누르면 오늘의 미션이 준비됩니다.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===================================================== -->
+  <!-- 상단 바 : 대시보드 진입 후에만 보임                      -->
+  <!-- ===================================================== -->
+  <header id="app-header" class="app-header is-hidden">
+    <button type="button" class="header-logo" data-go="dashboard">따숲</button>
+    <nav class="header-nav">
+      <button type="button" data-go="dashboard">홈</button>
+      <button type="button" data-go="check">오늘의 체크</button>
+      <button type="button" data-go="settings">설정</button>
+    </nav>
+  </header>
+
+  <main id="app-main">
+
+    <!-- ===================================================== -->
+    <!-- 화면 1 : 랜딩                                          -->
+    <!-- ===================================================== -->
+    <section id="view-landing" class="view is-active">
+      <div class="landing-badges">
+        <span class="badge">회원가입 없음</span>
+        <span class="badge">서버에 저장하지 않습니다</span>
+      </div>
+
+      <h1 class="landing-title">따숲</h1>
+      <p class="landing-tagline">하루 3분, 마음이 따숲</p>
+
+      <p class="landing-desc">
+        체크 4개면 끝나요. 약 20초입니다.<br>
+        오늘 할 수 있는 것만 딱 3개 준비해 드릴게요.
+      </p>
+
+      <button type="button" class="btn btn-primary btn-lg" data-go="onboarding">
+        시작하기
+      </button>
+
+      <button type="button" class="btn btn-text" data-go="dashboard">
+        이미 해보셨나요? 내 대시보드로
+      </button>
+
+      <p class="landing-origin">
+        첫째 아이 시온(始溫) - 처음 시, 따뜻할 온.<br>
+        그 이름의 뜻에서 시작했습니다.
+      </p>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- 화면 2 : 온보딩 (3스텝)                                 -->
+    <!-- ===================================================== -->
+    <section id="view-onboarding" class="view">
+
+      <!-- 스텝 1 : 별명 -->
+      <div id="onboard-step-1" class="onboard-step is-active">
+        <p class="step-indicator">1 / 3</p>
+        <h2 class="step-title">아이를 뭐라고 부를까요?</h2>
+        <input
+          type="text"
+          id="input-nickname"
+          class="input-text"
+          placeholder="예: 콩이"
+          maxlength="10"
+          autocomplete="off">
+        <p class="step-help">
+          실명 대신 별명을 써주세요.<br>
+          이 별명은 서버로 전송되지 않습니다.
+        </p>
+        <button type="button" class="btn btn-primary btn-lg" id="btn-nickname-next">
+          다음
+        </button>
+      </div>
+
+      <!-- 스텝 2 : 월령 구간 -->
+      <div id="onboard-step-2" class="onboard-step">
+        <p class="step-indicator">2 / 3</p>
+        <h2 class="step-title">지금 몇 개월인가요?</h2>
+        <p class="step-help">정확한 나이 대신 구간만 골라주세요.</p>
+        <div class="choice-grid" id="choice-ageband">
+          <button type="button" class="btn btn-choice" data-age="24_35">24~35개월</button>
+          <button type="button" class="btn btn-choice" data-age="36_47">36~47개월</button>
+          <button type="button" class="btn btn-choice" data-age="48_59">48~59개월</button>
+          <button type="button" class="btn btn-choice" data-age="60_72plus">60개월 이상</button>
+        </div>
+      </div>
+
+      <!-- 스텝 3 : 힘든 영역 1개 -->
+      <div id="onboard-step-3" class="onboard-step">
+        <p class="step-indicator">3 / 3</p>
+        <h2 class="step-title">지금 가장 힘든 건 뭔가요?</h2>
+        <p class="step-help">하나만 골라주세요. 나중에 언제든 바꿀 수 있어요.</p>
+        <div class="choice-grid" id="choice-area">
+          <button type="button" class="btn btn-choice" data-area="request">말로 요구하기</button>
+          <button type="button" class="btn btn-choice" data-area="sitting">앉아있기</button>
+          <button type="button" class="btn btn-choice" data-area="instruction">지시 따르기</button>
+          <button type="button" class="btn btn-choice" data-area="eyecontact">눈맞춤 · 호명</button>
+          <button type="button" class="btn btn-choice" data-area="imitation">모방</button>
+          <button type="button" class="btn btn-choice" data-area="play">놀이 · 상호작용</button>
+          <button type="button" class="btn btn-choice" data-area="selfcare">자조 (식사 · 배변 · 옷)</button>
+          <button type="button" class="btn btn-choice" data-area="behavior">문제행동</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- 화면 3 : 오늘의 체크 (4문항)                            -->
+    <!-- ===================================================== -->
+    <section id="view-check" class="view">
+      <div class="check-head">
+        <p class="check-area-label">
+          오늘은 <strong id="check-area-name">말로 요구하기</strong> 볼게요
+          <button type="button" class="btn btn-text btn-sm" id="btn-change-area">다른 영역 볼래요</button>
+        </p>
+        <p class="check-meta">
+          <span>약 20초 · 4문항</span>
+          <span id="check-progress-text">0 / 4 답변함</span>
+        </p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="check-progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- 문항 4개가 여기에 자동으로 채워집니다 (9단계) -->
+      <div id="check-questions" class="check-questions"></div>
+
+      <p class="check-help">모르겠는 건 그냥 넘기셔도 돼요.</p>
+
+      <button type="button" class="btn btn-primary btn-lg" id="btn-get-missions" disabled>
+        오늘 미션 받기
+      </button>
+
+      <button type="button" class="btn btn-text" id="btn-same-as-yesterday">
+        어제랑 똑같아요, 바로 미션 볼게요
+      </button>
+
+      <!-- 영역 다시 고르기 : 평소에는 숨김 -->
+      <div id="area-picker" class="choice-grid is-hidden"></div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- 화면 4 : 대시보드                                       -->
+    <!-- ===================================================== -->
+    <section id="view-dashboard" class="view">
+
+      <!-- 레벨 / 경험치 / 스트릭 -->
+      <div class="card card-level">
+        <div class="level-row">
+          <span class="level-name" id="level-name">Lv1 새싹코치</span>
+          <span class="streak" id="streak-text">함께한 지 1일</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="xp-fill"></div>
+        </div>
+        <p class="xp-text" id="xp-text">0 / 100 XP</p>
+      </div>
+
+      <!-- 로딩 -->
+      <div id="loading-box" class="card is-hidden">
+        <p class="loading-text">오늘의 미션을 준비하고 있어요...</p>
+      </div>
+
+      <!-- 에러 안내 -->
+      <div id="error-box" class="card card-error is-hidden">
+        <p id="error-message"></p>
+        <button type="button" class="btn btn-secondary" id="btn-retry">다시 시도</button>
+      </div>
+
+      <!-- 안전 안내 : 심각한 문제행동 응답 시에만 노출 -->
+      <div id="safety-box" class="card card-safety is-hidden">
+        <h2 class="card-title">잠시만요</h2>
+        <p id="safety-message"></p>
+        <ul id="safety-resources" class="safety-list"></ul>
+        <button type="button" class="btn btn-text" id="btn-safety-continue">
+          그래도 미션 볼게요
+        </button>
+      </div>
+
+      <!-- 오늘의 미션 3개 -->
+      <div class="section-block">
+        <h2 class="section-title">오늘의 미션</h2>
+        <div id="mission-list" class="mission-list"></div>
+        <button type="button" class="btn btn-secondary" id="btn-rest-today">
+          오늘은 쉬어갈게요
+        </button>
+      </div>
+
+      <!-- 오늘의 말씀 -->
+      <div class="section-block">
+        <h2 class="section-title">오늘의 말씀</h2>
+        <div class="card card-verse" id="verse-card">
+          <div class="verse-block">
+            <h3 class="verse-label">부모에게</h3>
+            <p id="verse-for-parent"></p>
+          </div>
+          <div class="verse-block">
+            <h3 class="verse-label">오늘의 한 걸음</h3>
+            <p id="verse-today-step"></p>
+          </div>
+          <div class="verse-scripture">
+            <blockquote id="verse-text"></blockquote>
+            <p class="verse-ref" id="verse-reference"></p>
+            <p class="verse-source">개역한글판 · 대한성서공회</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 주간 챌린지 -->
+      <div class="section-block">
+        <h2 class="section-title">이번 주 챌린지</h2>
+        <div class="card">
+          <p id="challenge-title">아직 챌린지가 없어요</p>
+          <div class="progress-bar">
+            <div class="progress-fill" id="challenge-fill"></div>
+          </div>
+          <p class="challenge-count" id="challenge-count">0 / 0</p>
+        </div>
+      </div>
+
+      <!-- 최근 7일 -->
+      <div class="section-block">
+        <h2 class="section-title">최근 7일</h2>
+        <div class="card">
+          <div id="heatmap" class="heatmap"></div>
+        </div>
+      </div>
+
+      <!-- 배지 -->
+      <div class="section-block">
+        <h2 class="section-title">모은 배지</h2>
+        <div class="card">
+          <div id="badge-list" class="badge-list">
+            <p class="empty-text">첫 미션을 하시면 배지가 생겨요.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- 화면 5 : 설정                                          -->
+    <!-- ===================================================== -->
+    <section id="view-settings" class="view">
+      <h2 class="section-title">설정</h2>
+
+      <div class="card">
+        <div class="setting-row">
+          <span class="setting-label">아이 별명</span>
+          <span class="setting-value" id="setting-nickname">-</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">월령 구간</span>
+          <span class="setting-value" id="setting-ageband">-</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">지금 보는 영역</span>
+          <span class="setting-value" id="setting-area">-</span>
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-edit-profile">
+          다시 설정하기
+        </button>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">내 데이터</h3>
+        <p class="card-desc">
+          따숲은 아이 정보를 서버에 저장하지 않습니다.<br>
+          모든 기록은 이 브라우저 안에만 있습니다.
+        </p>
+        <button type="button" class="btn btn-secondary" id="btn-export">
+          JSON으로 내보내기
+        </button>
+        <button type="button" class="btn btn-danger" id="btn-reset">
+          전체 삭제
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================== -->
+  <!-- 화면 6 : 미션 상세 모달                                  -->
+  <!-- ===================================================== -->
+  <div id="modal-mission" class="modal is-hidden">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-close" id="btn-modal-close" aria-label="닫기">닫기</button>
+
+      <h2 class="modal-title" id="modal-title"></h2>
+      <p class="modal-meta" id="modal-meta"></p>
+
+      <h3 class="modal-label">왜 하나요?</h3>
+      <p id="modal-why"></p>
+
+      <h3 class="modal-label">이렇게 해보세요</h3>
+      <ol id="modal-steps" class="modal-steps"></ol>
+
+      <h3 class="modal-label">이런 것도 성공이에요</h3>
+      <ul id="modal-hints" class="modal-hints"></ul>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="btn-mission-tried">
+          시도했어요
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-mission-done">
+          완료했어요
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- 토스트 : 레벨업 / XP 안내                                -->
+  <!-- ===================================================== -->
+  <div id="toast" class="toast is-hidden"></div>
+
+  <!-- ===================================================== -->
+  <!-- 하단 고지                                              -->
+  <!-- ===================================================== -->
+  <footer class="app-footer">
+    <p>따숲은 교육 참고용 서비스이며, 진단이나 치료를 대체하지 않습니다.</p>
+    <p>성경 본문: 『성경전서 개역한글판』(대한성서공회) - 저작재산권 보호기간이 만료된 판본을 원문 그대로 인용합니다.</p>
+    <p>아이의 실명, 생년월일, 진단명, 연락처, 사진을 수집하지 않으며 서버에 저장하지 않습니다.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
