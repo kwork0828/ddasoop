@@ -1,0 +1,938 @@
+/* ============================================
+   따숲 (ddasoop) - style.css
+   하루 3분, 마음이 따숲
+   ============================================ */
+
+/* --------------------------------------------
+   1. 색상과 크기를 한곳에 모아둔 변수
+   여기 값만 바꾸면 서비스 전체 색이 바뀝니다.
+   -------------------------------------------- */
+:root {
+  --forest: #3d7a5f;
+  --forest-dark: #2e5c48;
+  --forest-light: #e8f2ec;
+  --warm: #e8a87c;
+  --warm-light: #fdf0e6;
+  --paper: #faf8f5;
+  --card: #ffffff;
+  --ink: #2d3330;
+  --ink-soft: #6b7570;
+  --ink-faint: #a3aba7;
+  --line: #e4e0d9;
+  --danger: #c0574f;
+  --danger-light: #fbeceb;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --gap: 16px;
+  --tap: 56px;
+
+  --shadow: 0 2px 8px rgba(45, 51, 48, 0.06);
+  --shadow-up: 0 -2px 12px rgba(45, 51, 48, 0.08);
+}
+
+/* --------------------------------------------
+   2. 기본 초기화
+   -------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic",
+               "맑은 고딕", system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+  padding-bottom: 40px;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+ol, ul {
+  list-style-position: inside;
+}
+
+/* --------------------------------------------
+   3. 화면 전환의 핵심
+   is-active가 붙은 화면 하나만 보입니다.
+   -------------------------------------------- */
+.view {
+  display: none;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.view.is-active {
+  display: block;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+/* --------------------------------------------
+   4. 상단 바
+   -------------------------------------------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  background: rgba(250, 248, 245, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--forest);
+  letter-spacing: -0.02em;
+}
+
+.header-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.header-nav button {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+}
+
+.header-nav button:hover {
+  background: var(--forest-light);
+  color: var(--forest);
+}
+
+.header-nav button.is-current {
+  background: var(--forest-light);
+  color: var(--forest);
+  font-weight: 700;
+}
+
+/* --------------------------------------------
+   5. 버튼
+   모든 버튼은 최소 56px. 엄지로 누를 수 있게.
+   -------------------------------------------- */
+.btn {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn + .btn {
+  margin-top: 10px;
+}
+
+.btn-primary {
+  background: var(--forest);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--forest-dark);
+}
+
+.btn-primary:disabled {
+  background: var(--line);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.btn-primary:disabled:active {
+  transform: none;
+}
+
+.btn-secondary {
+  background: var(--forest-light);
+  color: var(--forest);
+}
+
+.btn-secondary:hover {
+  background: #dcebe2;
+}
+
+.btn-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.btn-text {
+  background: none;
+  color: var(--ink-soft);
+  font-weight: 500;
+  font-size: 15px;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-sm {
+  display: inline-block;
+  width: auto;
+  min-height: auto;
+  padding: 4px 8px;
+  font-size: 13px;
+  margin-top: 0;
+}
+
+.btn-lg {
+  font-size: 17px;
+  min-height: 60px;
+  margin-top: 20px;
+}
+
+/* --------------------------------------------
+   6. 랜딩
+   -------------------------------------------- */
+#view-landing {
+  padding-top: 48px;
+  text-align: center;
+}
+
+.landing-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.badge {
+  padding: 6px 12px;
+  background: var(--forest-light);
+  color: var(--forest);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.landing-title {
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--forest);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.landing-tagline {
+  margin-top: 10px;
+  font-size: 19px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.landing-desc {
+  margin-top: 36px;
+  font-size: 17px;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+.landing-origin {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink-faint);
+  line-height: 1.8;
+}
+
+/* --------------------------------------------
+   7. 온보딩
+   -------------------------------------------- */
+.onboard-step {
+  display: none;
+}
+
+.onboard-step.is-active {
+  display: block;
+}
+
+.step-indicator {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--forest);
+  letter-spacing: 0.05em;
+}
+
+.step-title {
+  margin-top: 8px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.step-help {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.input-text {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 20px;
+  padding: 16px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-family: inherit;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.input-text:focus {
+  outline: none;
+  border-color: var(--forest);
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.btn-choice {
+  min-height: 72px;
+  padding: 12px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 0;
+}
+
+.btn-choice:hover {
+  border-color: var(--forest);
+  background: var(--forest-light);
+}
+
+.btn-choice.is-selected {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+}
+
+/* --------------------------------------------
+   8. 오늘의 체크
+   -------------------------------------------- */
+.check-head {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.check-area-label {
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.check-area-label strong {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.check-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.progress-bar {
+  height: 8px;
+  margin-top: 8px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--forest);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.check-questions {
+  margin-top: 8px;
+}
+
+.question {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.question-text {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn-answer {
+  min-height: 64px;
+  padding: 8px 4px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.btn-answer:hover {
+  border-color: var(--forest);
+}
+
+.btn-answer.is-selected {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+}
+
+.check-help {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* --------------------------------------------
+   9. 카드
+   -------------------------------------------- */
+.card {
+  padding: 20px;
+  margin-top: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.card-desc {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.card .btn {
+  margin-top: 14px;
+}
+
+.section-block {
+  margin-top: 32px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+/* --------------------------------------------
+   10. 레벨 / XP
+   -------------------------------------------- */
+.card-level {
+  margin-top: 0;
+  background: linear-gradient(135deg, var(--forest-light), var(--warm-light));
+  border-color: transparent;
+}
+
+.level-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.level-name {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--forest-dark);
+  letter-spacing: -0.02em;
+}
+
+.streak {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--warm);
+}
+
+.card-level .progress-fill {
+  background: var(--warm);
+}
+
+.xp-text {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* --------------------------------------------
+   11. 미션 카드
+   -------------------------------------------- */
+.mission-list {
+  margin-top: 12px;
+}
+
+.mission-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  margin-top: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.mission-body {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.mission-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.mission-meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.mission-card .btn-done {
+  flex-shrink: 0;
+  width: auto;
+  min-height: 48px;
+  margin-top: 0;
+  padding: 12px 18px;
+  background: var(--forest-light);
+  color: var(--forest);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mission-card.is-done {
+  opacity: 0.55;
+}
+
+.mission-card.is-done .btn-done {
+  background: var(--forest);
+  color: #fff;
+}
+
+/* --------------------------------------------
+   12. 오늘의 말씀
+   -------------------------------------------- */
+.card-verse {
+  background: linear-gradient(180deg, var(--card), var(--warm-light));
+}
+
+.verse-block + .verse-block {
+  margin-top: 20px;
+}
+
+.verse-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warm);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.verse-block p {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.verse-scripture {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px dashed var(--line);
+  text-align: center;
+}
+
+.verse-scripture blockquote {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.9;
+  color: var(--forest-dark);
+  word-break: keep-all;
+}
+
+.verse-ref {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.verse-source {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* --------------------------------------------
+   13. 챌린지 / 히트맵 / 배지
+   -------------------------------------------- */
+.challenge-count {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.heat-cell {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--forest-light);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.heat-cell.is-active {
+  background: var(--forest);
+  color: #fff;
+  font-weight: 700;
+}
+
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge-item {
+  padding: 8px 14px;
+  background: var(--warm-light);
+  color: #a86a3d;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* --------------------------------------------
+   14. 상태 카드 (로딩 / 에러 / 안전)
+   -------------------------------------------- */
+.loading-text {
+  font-size: 15px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.card-error {
+  background: var(--danger-light);
+  border-color: #f0d4d1;
+  color: var(--danger);
+}
+
+.card-safety {
+  background: var(--warm-light);
+  border-color: #f0dcc9;
+}
+
+.safety-list {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+/* --------------------------------------------
+   15. 설정
+   -------------------------------------------- */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.setting-label {
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.setting-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* --------------------------------------------
+   16. 미션 상세 모달
+   -------------------------------------------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 51, 48, 0.45);
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 28px 20px 32px;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  box-shadow: var(--shadow-up);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  min-height: 44px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+}
+
+.modal-close:hover {
+  background: var(--forest-light);
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  padding-right: 60px;
+}
+
+.modal-meta {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.modal-label {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--forest);
+  letter-spacing: 0.04em;
+}
+
+.modal-steps li,
+.modal-hints li {
+  padding: 6px 0;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.modal-actions .btn {
+  margin-top: 0;
+}
+
+/* --------------------------------------------
+   17. 토스트
+   -------------------------------------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  z-index: 200;
+  transform: translateX(-50%);
+  padding: 14px 24px;
+  background: var(--forest-dark);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(45, 51, 48, 0.25);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------
+   18. 하단 고지
+   -------------------------------------------- */
+.app-footer {
+  max-width: 640px;
+  margin: 48px auto 0;
+  padding: 24px 20px 40px;
+  border-top: 1px solid var(--line);
+}
+
+.app-footer p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--ink-faint);
+  word-break: keep-all;
+}
+
+.app-footer p + p {
+  margin-top: 8px;
+}
+
+/* ============================================
+   19. 반응형
+   ============================================ */
+
+/* 아주 작은 폰 (360px 이하) */
+@media (max-width: 360px) {
+  .landing-title {
+    font-size: 42px;
+  }
+
+  .btn-answer {
+    font-size: 13px;
+    min-height: 60px;
+  }
+
+  .choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 태블릿 이상 (768px 이상) */
+@media (min-width: 768px) {
+  body {
+    font-size: 17px;
+  }
+
+  .view {
+    padding: 32px 24px 60px;
+  }
+
+  #view-landing {
+    padding-top: 80px;
+  }
+
+  .landing-title {
+    font-size: 64px;
+  }
+
+  .choice-grid {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  .modal {
+    align-items: center;
+  }
+
+  .modal-panel {
+    max-width: 560px;
+    border-radius: 24px;
+    max-height: 82vh;
+  }
+}
+
+/* 데스크톱 (1024px 이상) */
+@media (min-width: 1024px) {
+  .view {
+    max-width: 720px;
+  }
+
+  .app-header,
+  .app-footer {
+    max-width: 720px;
+  }
+}
+
+/* 애니메이션을 줄여달라고 설정한 사용자 존중 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
