@@ -13,7 +13,7 @@
   <!-- 상단 바 : 대시보드 진입 후에만 보임                      -->
   <!-- ===================================================== -->
   <header id="app-header" class="app-header is-hidden">
-    <button type="button" class="header-logo" data-go="dashboard">따숲</button>
+    <button type="button" class="header-logo" data-go="landing">따숲</button>
     <nav class="header-nav">
       <button type="button" data-go="dashboard">홈</button>
       <button type="button" data-go="check">오늘의 체크</button>
@@ -129,7 +129,6 @@
         </div>
       </div>
 
-      <!-- 문항 4개가 여기에 자동으로 채워집니다 (9단계) -->
       <div id="check-questions" class="check-questions"></div>
 
       <p class="check-help">모르겠는 건 그냥 넘기셔도 돼요.</p>
@@ -142,7 +141,6 @@
         어제랑 똑같아요, 바로 미션 볼게요
       </button>
 
-      <!-- 영역 다시 고르기 : 평소에는 숨김 -->
       <div id="area-picker" class="choice-grid is-hidden"></div>
     </section>
 
@@ -155,12 +153,22 @@
       <div class="card card-level">
         <div class="level-row">
           <span class="level-name" id="level-name">Lv1 새싹코치</span>
-          <span class="streak" id="streak-text">함께한 지 1일</span>
+          <span class="streak" id="streak-text">오늘부터 시작해요</span>
         </div>
         <div class="progress-bar">
           <div class="progress-fill" id="xp-fill"></div>
         </div>
         <p class="xp-text" id="xp-text">0 / 100 XP</p>
+      </div>
+
+      <!-- 우리의 숲 -->
+      <div class="section-block">
+        <h2 class="section-title">우리의 숲</h2>
+        <div class="card card-tree">
+          <div id="tree-art" class="tree-art"></div>
+          <p class="tree-stage" id="tree-stage">씨앗을 심었어요</p>
+          <p class="tree-desc" id="tree-desc">미션을 해낼 때마다 열매가 하나씩 맺혀요.</p>
+        </div>
       </div>
 
       <!-- 로딩 -->
@@ -174,7 +182,7 @@
         <button type="button" class="btn btn-secondary" id="btn-retry">다시 시도</button>
       </div>
 
-      <!-- 안전 안내 : 심각한 문제행동 응답 시에만 노출 -->
+      <!-- 안전 안내 -->
       <div id="safety-box" class="card card-safety is-hidden">
         <h2 class="card-title">잠시만요</h2>
         <p id="safety-message"></p>
@@ -184,7 +192,7 @@
         </button>
       </div>
 
-      <!-- 오늘의 미션 3개 -->
+      <!-- 오늘의 미션 -->
       <div class="section-block">
         <h2 class="section-title">오늘의 미션</h2>
         <div id="mission-list" class="mission-list"></div>
@@ -235,10 +243,10 @@
 
       <!-- 배지 -->
       <div class="section-block">
-        <h2 class="section-title">모은 배지</h2>
+        <h2 class="section-title">모은 열매</h2>
         <div class="card">
           <div id="badge-list" class="badge-list">
-            <p class="empty-text">첫 미션을 하시면 배지가 생겨요.</p>
+            <p class="empty-text">첫 미션을 하시면 열매가 맺혀요.</p>
           </div>
         </div>
       </div>
@@ -273,10 +281,12 @@
         <h3 class="card-title">내 데이터</h3>
         <p class="card-desc">
           따숲은 아이 정보를 서버에 저장하지 않습니다.<br>
-          모든 기록은 이 브라우저 안에만 있습니다.
+          모든 기록은 이 브라우저 안에만 있습니다.<br><br>
+          아래 버튼은 지금까지의 기록을 읽기 쉬운 글로 정리해<br>
+          이 기기에 저장합니다. 어디로도 전송되지 않습니다.
         </p>
         <button type="button" class="btn btn-secondary" id="btn-export">
-          JSON으로 내보내기
+          지금까지 기록 저장하기
         </button>
         <button type="button" class="btn btn-danger" id="btn-reset">
           전체 삭제
@@ -317,25 +327,20 @@
     </div>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- 토스트 : 레벨업 / XP 안내                                -->
-  <!-- ===================================================== -->
+  <!-- 토스트 -->
   <div id="toast" class="toast is-hidden"></div>
 
-  <!-- ===================================================== -->
-  <!-- 하단 고지                                              -->
-  <!-- ===================================================== -->
+  <!-- 하단 고지 -->
   <footer class="app-footer">
     <p>따숲은 교육 참고용 서비스이며, 진단이나 치료를 대체하지 않습니다.</p>
     <p>성경 본문: 『성경전서 개역한글판』(대한성서공회) - 저작재산권 보호기간이 만료된 판본을 원문 그대로 인용합니다.</p>
     <p>아이의 실명, 생년월일, 진단명, 연락처, 사진을 수집하지 않으며 서버에 저장하지 않습니다.</p>
   </footer>
 
-<script src="js/data.js"></script>
+  <script src="js/data.js"></script>
   <script src="js/verses.js"></script>
   <script src="js/fallback.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
-

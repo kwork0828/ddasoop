@@ -9,11 +9,8 @@
 const STORAGE_KEY = "ddasoop_v1";
 const LOG_LIMIT = 60;
 
-/* --------------------------------------------
-   1. 날짜 도우미
-   -------------------------------------------- */
+/* 1. 날짜 도우미 */
 
-// 오늘 날짜를 2026-08-17 모양으로 돌려줍니다.
 function todayStr() {
   const d = new Date();
   const y = d.getFullYear();
@@ -22,7 +19,6 @@ function todayStr() {
   return y + "-" + m + "-" + day;
 }
 
-// 며칠 전 날짜를 구합니다.
 function dateStrBefore(days) {
   const d = new Date();
   d.setDate(d.getDate() - days);
@@ -32,14 +28,12 @@ function dateStrBefore(days) {
   return y + "-" + m + "-" + day;
 }
 
-// 두 날짜 사이가 며칠인지 셉니다.
 function daysBetween(fromStr, toStr) {
   const a = new Date(fromStr + "T00:00:00");
   const b = new Date(toStr + "T00:00:00");
   return Math.round((b - a) / 86400000);
 }
 
-// 이번 주 월요일 날짜를 구합니다.
 function mondayOfThisWeek() {
   const d = new Date();
   const day = d.getDay();
@@ -51,9 +45,8 @@ function mondayOfThisWeek() {
   return y + "-" + m + "-" + dd;
 }
 
-/* --------------------------------------------
-   2. 처음 시작할 때의 빈 데이터
-   -------------------------------------------- */
+/* 2. 처음 시작할 때의 빈 데이터 */
+
 function emptyState() {
   return {
     schemaVersion: 1,
@@ -103,9 +96,7 @@ function emptyState() {
   };
 }
 
-/* --------------------------------------------
-   3. 저장 / 불러오기
-   -------------------------------------------- */
+/* 3. 저장 / 불러오기 */
 
 function loadState() {
   try {
@@ -115,13 +106,11 @@ function loadState() {
     }
     const parsed = JSON.parse(raw);
 
-    // 옛 버전 데이터면 새로 시작합니다.
     if (parsed.schemaVersion !== 1) {
       return emptyState();
     }
     return parsed;
   } catch (e) {
-    // 저장된 내용이 깨졌을 때도 앱이 멈추지 않게 합니다.
     console.warn("저장된 데이터를 읽지 못해 새로 시작합니다.", e);
     return emptyState();
   }
@@ -138,9 +127,7 @@ function saveState(state) {
   }
 }
 
-/* --------------------------------------------
-   4. 레벨 계산
-   -------------------------------------------- */
+/* 4. 레벨 계산 */
 
 function getLevel(totalXp) {
   for (let i = LEVELS.length - 1; i >= 0; i--) {
@@ -151,7 +138,6 @@ function getLevel(totalXp) {
   return LEVELS[0];
 }
 
-// 현재 레벨 안에서 얼마나 왔는지 구합니다.
 function getLevelProgress(totalXp) {
   const lv = getLevel(totalXp);
   const span = lv.max - lv.min;
@@ -165,10 +151,7 @@ function getLevelProgress(totalXp) {
   };
 }
 
-/* --------------------------------------------
-   5. XP 더하기
-   감점은 어디에도 없습니다.
-   -------------------------------------------- */
+/* 5. XP 더하기 (감점 없음) */
 
 function addXp(state, amount) {
   const before = getLevel(state.gamification.totalXp);
@@ -181,23 +164,16 @@ function addXp(state, amount) {
   };
 }
 
-/* --------------------------------------------
-   6. 스트릭 (연속 실행일)
-
-   끊겨도 비난하지 않습니다.
-   주 1회 자동 보호가 적용됩니다.
-   -------------------------------------------- */
+/* 6. 스트릭 */
 
 function touchStreak(state) {
   const today = todayStr();
   const last = state.gamification.lastActiveDate;
 
-  // 오늘 이미 처리했으면 그대로 둡니다.
   if (last === today) {
     return { changed: false, protectedByShield: false, wasBroken: false };
   }
 
-  // 처음 활동하는 경우
   if (!last) {
     state.gamification.streakDays = 1;
     state.gamification.lastActiveDate = today;
@@ -206,14 +182,12 @@ function touchStreak(state) {
 
   const gap = daysBetween(last, today);
 
-  // 어제 했으면 이어집니다.
   if (gap === 1) {
     state.gamification.streakDays += 1;
     state.gamification.lastActiveDate = today;
     return { changed: true, protectedByShield: false, wasBroken: false };
   }
 
-  // 하루 빠졌을 때 : 이번 주 보호가 남아 있으면 지켜줍니다.
   if (gap === 2) {
     const thisWeek = mondayOfThisWeek();
     if (state.gamification.shieldWeekOf !== thisWeek) {
@@ -224,16 +198,13 @@ function touchStreak(state) {
     }
   }
 
-  // 그 외에는 1일부터 다시 시작합니다.
-  const wasLong = state.gamification.streakDays >= 1 && gap > 7;
+  const wasLong = gap > 7;
   state.gamification.streakDays = 1;
   state.gamification.lastActiveDate = today;
   return { changed: true, protectedByShield: false, wasBroken: true, longGap: wasLong };
 }
 
-/* --------------------------------------------
-   7. 배지
-   -------------------------------------------- */
+/* 7. 배지 */
 
 function hasBadge(state, id) {
   return state.gamification.badges.some(function (b) {
@@ -258,7 +229,6 @@ function giveBadge(state, id) {
   return info;
 }
 
-// 조건을 훑어서 새로 받을 배지를 모두 지급합니다.
 function checkBadges(state) {
   const earned = [];
   const c = state.counters;
@@ -286,9 +256,7 @@ function checkBadges(state) {
   return earned;
 }
 
-/* --------------------------------------------
-   8. 기록 남기기
-   -------------------------------------------- */
+/* 8. 기록 남기기 */
 
 function addLog(state, entry) {
   state.logs.push({
@@ -299,16 +267,13 @@ function addLog(state, entry) {
     at: new Date().toISOString()
   });
 
-  // 60일치만 보관합니다.
   const cutoff = dateStrBefore(LOG_LIMIT);
   state.logs = state.logs.filter(function (log) {
     return log.date >= cutoff;
   });
 }
 
-/* --------------------------------------------
-   9. 최근 7일 기록 (히트맵용)
-   -------------------------------------------- */
+/* 9. 최근 7일 (히트맵용) */
 
 function getRecentDays(state) {
   const result = [];
@@ -329,9 +294,7 @@ function getRecentDays(state) {
   return result;
 }
 
-/* --------------------------------------------
-   10. 주간 챌린지
-   -------------------------------------------- */
+/* 10. 주간 챌린지 */
 
 function ensureWeeklyChallenge(state, area) {
   const thisWeek = mondayOfThisWeek();
@@ -367,9 +330,7 @@ function bumpChallenge(state, area) {
   return false;
 }
 
-/* --------------------------------------------
-   11. 하루가 바뀌었는지 확인
-   -------------------------------------------- */
+/* 11. 하루가 바뀌었는지 */
 
 function isNewDay(state) {
   return state.today.date !== todayStr();
@@ -384,13 +345,7 @@ function resetToday(state) {
   };
 }
 
-/* --------------------------------------------
-   12. 오늘 볼 영역 정하기
-
-   기본은 온보딩에서 고른 영역입니다.
-   같은 영역이 3일 이상 이어지면 화면에서
-   다른 영역을 부드럽게 제안합니다.
-   -------------------------------------------- */
+/* 12. 오늘 볼 영역 */
 
 function decideTodayArea(state) {
   const saved = state.assessment.todayArea;
@@ -403,10 +358,7 @@ function decideTodayArea(state) {
   return state.profile.focusArea || "request";
 }
 
-/* --------------------------------------------
-   13. 어제 답변 가져오기
-   "어제랑 똑같아요" 버튼에서 씁니다.
-   -------------------------------------------- */
+/* 13. 어제 답변 가져오기 */
 
 function getYesterdayAnswers(state) {
   const answers = state.assessment.dailyAnswers;
@@ -420,10 +372,7 @@ function getYesterdayAnswers(state) {
   return null;
 }
 
-/* --------------------------------------------
-   14. 최근에 다룬 영역
-   미션이 겹치지 않게 서버에 알려줍니다.
-   -------------------------------------------- */
+/* 14. 최근에 다룬 영역 */
 
 function getRecentAreas(state) {
   const areas = [];
@@ -441,19 +390,87 @@ function getRecentAreas(state) {
   return areas;
 }
 
-/* --------------------------------------------
-   15. 내보내기 / 전체 삭제
-   -------------------------------------------- */
+/* 15. 기록 저장 (읽을 수 있는 글)
 
-function exportState() {
-  const state = loadState();
-  const text = JSON.stringify(state, null, 2);
-  const blob = new Blob([text], { type: "application/json" });
+   별명과 활동 기록만 담기며, 실명이나 진단명은 애초에 없습니다.
+   이 기기에만 저장되고 어디로도 전송되지 않습니다. */
+
+function buildSummaryText() {
+  const s = loadState();
+  const p = getLevelProgress(s.gamification.totalXp);
+  const g = s.gamification;
+  const lines = [];
+
+  lines.push("따숲 기록");
+  lines.push("하루 3분, 마음이 따숲");
+  lines.push("========================================");
+  lines.push("");
+  lines.push("저장한 날 : " + todayStr());
+  lines.push("아이 별명 : " + (s.profile.nickname || "-"));
+  lines.push("월령 구간 : " + (AGE_BANDS[s.profile.ageBand] || "-"));
+  lines.push("");
+  lines.push("[ 지금까지 ]");
+  lines.push("코치 레벨   : Lv" + p.level.lv + " " + p.level.name);
+  lines.push("모은 경험치 : " + g.totalXp + " XP");
+  lines.push("연속한 날   : " + g.streakDays + "일");
+  lines.push("맺힌 열매   : " + g.badges.length + "개");
+  lines.push("");
+
+  lines.push("[ 맺힌 열매 ]");
+  if (g.badges.length === 0) {
+    lines.push("아직 없어요. 미션을 하나만 해보셔도 첫 열매가 맺혀요.");
+  } else {
+    g.badges.forEach(function (b) {
+      const info = BADGES.find(function (x) { return x.id === b.id; });
+      if (info) {
+        lines.push("- " + info.name + " : " + info.desc);
+      }
+    });
+  }
+  lines.push("");
+
+  lines.push("[ 영역별로 함께한 횟수 ]");
+  let hasCount = false;
+  Object.keys(s.counters).forEach(function (key) {
+    if (s.counters[key] > 0) {
+      hasCount = true;
+      lines.push("- " + AREAS[key].name + " : " + s.counters[key] + "회");
+    }
+  });
+  if (!hasCount) {
+    lines.push("아직 기록이 없어요.");
+  }
+  lines.push("");
+
+  lines.push("[ 최근 기록 ]");
+  const recent = s.logs.slice(-40);
+  if (recent.length === 0) {
+    lines.push("아직 기록이 없어요.");
+  } else {
+    const actionName = { tried: "시도했어요", done: "해냈어요", rest: "쉬어갔어요" };
+    recent.forEach(function (log) {
+      const areaName = log.area && AREAS[log.area] ? AREAS[log.area].short : "쉼";
+      lines.push(log.date + "  " + areaName + "  " + (actionName[log.action] || log.action));
+    });
+  }
+  lines.push("");
+
+  lines.push("========================================");
+  lines.push("따숲은 교육 참고용 서비스이며,");
+  lines.push("진단이나 치료를 대체하지 않습니다.");
+  lines.push("이 기록은 이 기기에만 저장되며 어디로도 전송되지 않습니다.");
+
+  return lines.join("\r\n");
+}
+
+function exportSummary() {
+  const text = "\uFEFF" + buildSummaryText();
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "ddasoop-" + todayStr() + ".json";
+  a.download = "ddasoop-record-" + todayStr() + ".txt";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

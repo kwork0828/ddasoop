@@ -11,9 +11,7 @@ let currentAnswers = {};
 let currentArea = "";
 let openedMissionIndex = -1;
 
-/* --------------------------------------------
-   1. 짧은 도우미
-   -------------------------------------------- */
+/* 1. 짧은 도우미 */
 
 function $(id) {
   return document.getElementById(id);
@@ -36,9 +34,7 @@ function toast(message) {
   }, 2400);
 }
 
-/* --------------------------------------------
-   2. 화면 전환
-   -------------------------------------------- */
+/* 2. 화면 전환 */
 
 function goto(viewName) {
   const views = document.querySelectorAll(".view");
@@ -51,7 +47,6 @@ function goto(viewName) {
     target.classList.add("is-active");
   }
 
-  // 랜딩과 온보딩에서는 상단 바를 감춥니다.
   const header = $("app-header");
   if (viewName === "landing" || viewName === "onboarding") {
     hide(header);
@@ -59,7 +54,6 @@ function goto(viewName) {
     show(header);
   }
 
-  // 현재 위치 표시
   const navButtons = document.querySelectorAll(".header-nav button");
   navButtons.forEach(function (b) {
     b.classList.toggle("is-current", b.dataset.go === viewName);
@@ -68,9 +62,7 @@ function goto(viewName) {
   window.scrollTo(0, 0);
 }
 
-/* --------------------------------------------
-   3. 온보딩
-   -------------------------------------------- */
+/* 3. 온보딩 */
 
 function gotoOnboardStep(n) {
   const steps = document.querySelectorAll(".onboard-step");
@@ -85,7 +77,6 @@ function gotoOnboardStep(n) {
 }
 
 function setupOnboarding() {
-  // 스텝 1 : 별명
   $("btn-nickname-next").addEventListener("click", function () {
     const value = $("input-nickname").value.trim();
     if (!value) {
@@ -97,7 +88,6 @@ function setupOnboarding() {
     gotoOnboardStep(2);
   });
 
-  // 스텝 2 : 월령 구간
   const ageButtons = $("choice-ageband").querySelectorAll("button");
   ageButtons.forEach(function (btn) {
     btn.addEventListener("click", function () {
@@ -107,7 +97,6 @@ function setupOnboarding() {
     });
   });
 
-  // 스텝 3 : 힘든 영역 1개
   const areaButtons = $("choice-area").querySelectorAll("button");
   areaButtons.forEach(function (btn) {
     btn.addEventListener("click", function () {
@@ -119,9 +108,7 @@ function setupOnboarding() {
   });
 }
 
-/* --------------------------------------------
-   4. 오늘의 체크 (4문항)
-   -------------------------------------------- */
+/* 4. 오늘의 체크 */
 
 function startCheck(area) {
   currentArea = area;
@@ -181,7 +168,6 @@ function updateCheckProgress() {
 }
 
 function setupCheck() {
-  // 다른 영역 고르기
   $("btn-change-area").addEventListener("click", function () {
     const picker = $("area-picker");
 
@@ -204,31 +190,28 @@ function setupCheck() {
     show(picker);
   });
 
-  // 미션 받기
   $("btn-get-missions").addEventListener("click", function () {
     submitCheck(false);
   });
 
-  // 어제랑 똑같아요
   $("btn-same-as-yesterday").addEventListener("click", function () {
     const yesterday = getYesterdayAnswers(state);
     if (yesterday) {
       currentAnswers = Object.assign({}, yesterday);
       delete currentAnswers.area;
     }
+    if (!currentArea) {
+      currentArea = decideTodayArea(state);
+    }
     submitCheck(true);
   });
 }
 
-/* --------------------------------------------
-   5. 체크 제출 -> 미션 준비
-   -------------------------------------------- */
+/* 5. 체크 제출 */
 
 function submitCheck(isSameAsYesterday) {
-  // 안전 검사 : 위험 신호가 있으면 미션보다 상담이 먼저입니다.
   const danger = currentAnswers[SAFETY_TRIGGER.questionId] === SAFETY_TRIGGER.value;
 
-  // 오늘 기록 저장
   const record = Object.assign({ area: currentArea }, currentAnswers);
   state.assessment.dailyAnswers[todayStr()] = record;
   state.assessment.todayArea = currentArea;
@@ -245,7 +228,10 @@ function submitCheck(isSameAsYesterday) {
   }
 
   saveState(state);
+  renderDashboard();
   goto("dashboard");
+
+  hide($("safety-box"));
 
   if (danger) {
     showSafety();
@@ -271,28 +257,25 @@ function showSafety() {
   hide($("loading-box"));
 }
 
-/* --------------------------------------------
-   6. 미션 준비
-
-   지금은 기본 미션을 씁니다.
-   14단계에서 AI 호출로 교체합니다.
-   -------------------------------------------- */
+/* 6. 미션 준비 (14단계에서 AI 호출로 교체) */
 
 function loadMissions() {
   hide($("error-box"));
   show($("loading-box"));
 
+  const area = currentArea || decideTodayArea(state);
+
   setTimeout(function () {
-    const base = FALLBACK_MISSIONS[currentArea] || FALLBACK_MISSIONS.request;
+    const base = FALLBACK_MISSIONS[area] || FALLBACK_MISSIONS.request;
 
     state.today.date = todayStr();
     state.today.missions = base.map(function (m) {
       return Object.assign({ status: "pending" }, m);
     });
 
-    state.today.verse = pickVerse(currentArea);
+    state.today.verse = pickVerse(area);
 
-    ensureWeeklyChallenge(state, currentArea);
+    ensureWeeklyChallenge(state, area);
     saveState(state);
 
     hide($("loading-box"));
@@ -305,7 +288,7 @@ function pickVerse(area) {
   const pool = VERSES.filter(function (v) {
     return v.category === category;
   });
-  const picked = pool[Math.floor(Math.random() * pool.length)];
+  const picked = pool[Math.floor(Math.random() * pool.length)] || VERSES[0];
 
   return {
     reference: picked.reference,
@@ -315,12 +298,11 @@ function pickVerse(area) {
   };
 }
 
-/* --------------------------------------------
-   7. 대시보드 그리기
-   -------------------------------------------- */
+/* 7. 대시보드 그리기 */
 
 function renderDashboard() {
   renderLevel();
+  renderTree();
   renderMissions();
   renderVerse();
   renderChallenge();
@@ -338,6 +320,137 @@ function renderLevel() {
   $("streak-text").textContent = streak > 0
     ? "함께한 지 " + streak + "일"
     : "오늘부터 시작해요";
+}
+
+/* 7-B. 우리의 숲
+
+   레벨이 오르면 나무가 자랍니다.
+   열매를 하나 받을 때마다 나무에 열매가 하나 맺힙니다. */
+
+const GROUND = '<ellipse cx="100" cy="146" rx="72" ry="9" fill="#e2d9c9"/>';
+
+const TREE_ART = {
+  1: {
+    stage: "새싹이 돋았어요",
+    desc: "작게 시작해도 괜찮아요. 이미 자라고 있어요.",
+    body: GROUND +
+      '<path d="M100 146 L100 126" stroke="#8a7861" stroke-width="3" stroke-linecap="round"/>' +
+      '<path d="M100 132 C86 128 82 116 92 114 C101 112 101 126 100 132Z" fill="#6aa886"/>' +
+      '<path d="M100 132 C114 128 118 116 108 114 C99 112 99 126 100 132Z" fill="#8cc0a3"/>',
+    fruits: [[80, 138], [120, 138], [88, 128], [112, 128]]
+  },
+  2: {
+    stage: "줄기가 자랐어요",
+    desc: "매일 조금씩, 눈에 안 보여도 자라고 있어요.",
+    body: GROUND +
+      '<path d="M100 146 L100 100" stroke="#8a7861" stroke-width="4" stroke-linecap="round"/>' +
+      '<ellipse cx="84" cy="118" rx="16" ry="8" fill="#6aa886" transform="rotate(-22 84 118)"/>' +
+      '<ellipse cx="116" cy="118" rx="16" ry="8" fill="#8cc0a3" transform="rotate(22 116 118)"/>' +
+      '<ellipse cx="87" cy="102" rx="14" ry="7" fill="#8cc0a3" transform="rotate(-25 87 102)"/>' +
+      '<ellipse cx="113" cy="102" rx="14" ry="7" fill="#6aa886" transform="rotate(25 113 102)"/>',
+    fruits: [[76, 130], [124, 130], [78, 112], [122, 112], [100, 94], [86, 90]]
+  },
+  3: {
+    stage: "잎이 무성해졌어요",
+    desc: "기다려주신 시간이 잎이 되었어요.",
+    body: GROUND +
+      '<path d="M100 146 L100 96" stroke="#8a7861" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="100" cy="82" r="30" fill="#6aa886"/>' +
+      '<circle cx="82" cy="92" r="20" fill="#8cc0a3"/>' +
+      '<circle cx="118" cy="92" r="20" fill="#8cc0a3"/>',
+    fruits: [
+      [88, 74], [112, 74], [100, 62], [78, 90],
+      [122, 90], [100, 92], [90, 100], [110, 100]
+    ]
+  },
+  4: {
+    stage: "가지가 뻗었어요",
+    desc: "쌓인 하루들이 가지가 되어 뻗어갑니다.",
+    body: GROUND +
+      '<path d="M100 146 L100 90" stroke="#8a7861" stroke-width="6" stroke-linecap="round"/>' +
+      '<path d="M100 112 L76 98" stroke="#8a7861" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M100 106 L124 92" stroke="#8a7861" stroke-width="4" stroke-linecap="round"/>' +
+      '<circle cx="100" cy="72" r="34" fill="#6aa886"/>' +
+      '<circle cx="70" cy="88" r="22" fill="#8cc0a3"/>' +
+      '<circle cx="130" cy="84" r="22" fill="#8cc0a3"/>',
+    fruits: [
+      [88, 62], [112, 62], [100, 50], [78, 72],
+      [122, 72], [100, 82], [66, 84], [132, 80],
+      [90, 92], [112, 92]
+    ]
+  },
+  5: {
+    stage: "나무가 되었어요",
+    desc: "이만큼 자란 건 매일 곁에 계셨기 때문이에요.",
+    body: GROUND +
+      '<path d="M100 146 L100 86" stroke="#7d6b55" stroke-width="8" stroke-linecap="round"/>' +
+      '<path d="M100 110 L70 92" stroke="#7d6b55" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M100 104 L130 86" stroke="#7d6b55" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="100" cy="64" r="38" fill="#4f8f6d"/>' +
+      '<circle cx="62" cy="82" r="26" fill="#6aa886"/>' +
+      '<circle cx="138" cy="78" r="26" fill="#6aa886"/>' +
+      '<circle cx="100" cy="44" r="24" fill="#8cc0a3"/>',
+    fruits: [
+      [86, 54], [114, 54], [100, 38], [76, 68],
+      [124, 68], [100, 76], [56, 80], [144, 76],
+      [88, 86], [112, 86], [66, 62], [134, 60]
+    ]
+  },
+  6: {
+    stage: "작은 숲이 되었어요",
+    desc: "한 그루가 숲이 되었습니다. 여기까지 오셨어요.",
+    body: GROUND +
+      '<path d="M46 146 L46 108" stroke="#7d6b55" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="46" cy="94" r="24" fill="#6aa886"/>' +
+      '<path d="M154 146 L154 108" stroke="#7d6b55" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="154" cy="94" r="24" fill="#6aa886"/>' +
+      '<path d="M100 146 L100 82" stroke="#7d6b55" stroke-width="9" stroke-linecap="round"/>' +
+      '<path d="M100 108 L74 90" stroke="#7d6b55" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M100 102 L126 84" stroke="#7d6b55" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="100" cy="58" r="40" fill="#4f8f6d"/>' +
+      '<circle cx="70" cy="76" r="26" fill="#6aa886"/>' +
+      '<circle cx="130" cy="72" r="26" fill="#6aa886"/>' +
+      '<circle cx="100" cy="36" r="24" fill="#8cc0a3"/>',
+    fruits: [
+      [86, 48], [114, 48], [100, 30], [76, 62],
+      [124, 62], [100, 70], [64, 78], [136, 74],
+      [88, 80], [112, 80], [40, 92], [160, 92]
+    ]
+  }
+};
+
+function renderTree() {
+  const level = getLevel(state.gamification.totalXp);
+  const art = TREE_ART[level.lv] || TREE_ART[1];
+  const fruitCount = state.gamification.badges.length;
+
+  let inner = art.body;
+
+  const shown = Math.min(fruitCount, art.fruits.length);
+  for (let i = 0; i < shown; i++) {
+    const pos = art.fruits[i];
+    inner += '<circle cx="' + pos[0] + '" cy="' + pos[1] +
+      '" r="5.5" fill="#e8a87c"/>';
+    inner += '<circle cx="' + (pos[0] - 1.6) + '" cy="' + (pos[1] - 1.6) +
+      '" r="1.6" fill="#f6d3b8"/>';
+  }
+
+  $("tree-art").innerHTML =
+    '<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" ' +
+    'role="img" aria-label="' + art.stage + ', 열매 ' + fruitCount + '개">' +
+    inner + '</svg>';
+
+  $("tree-stage").textContent = art.stage;
+
+  if (fruitCount === 0) {
+    $("tree-desc").textContent = art.desc;
+  } else {
+    let msg = art.desc + " 열매 " + fruitCount + "개가 맺혔어요.";
+    if (fruitCount > art.fruits.length) {
+      msg += " 나무가 더 자라면 다 보여드릴게요.";
+    }
+    $("tree-desc").textContent = msg;
+  }
 }
 
 function renderMissions() {
@@ -378,7 +491,7 @@ function renderMissions() {
     const doneBtn = document.createElement("button");
     doneBtn.type = "button";
     doneBtn.className = "btn-done";
-    doneBtn.textContent = m.status === "done" ? "했어요" : "했어요";
+    doneBtn.textContent = "했어요";
     doneBtn.addEventListener("click", function () {
       completeMission(index, "done");
     });
@@ -448,9 +561,7 @@ function renderBadges() {
   });
 }
 
-/* --------------------------------------------
-   8. 미션 상세 모달
-   -------------------------------------------- */
+/* 8. 미션 상세 모달 */
 
 function openMission(index) {
   const m = state.today.missions[index];
@@ -487,10 +598,7 @@ function closeMission() {
   openedMissionIndex = -1;
 }
 
-/* --------------------------------------------
-   9. 미션 완료 처리
-   실패해도 감점은 없습니다.
-   -------------------------------------------- */
+/* 9. 미션 완료 처리 (감점 없음) */
 
 function completeMission(index, action) {
   const m = state.today.missions[index];
@@ -505,7 +613,7 @@ function completeMission(index, action) {
   state.counters[m.area] = (state.counters[m.area] || 0) + 1;
   addLog(state, { area: m.area, action: action, xp: xp });
 
-  const streakInfo = touchStreak(state);
+  touchStreak(state);
   const challengeDone = bumpChallenge(state, m.area);
   const newBadges = checkBadges(state);
 
@@ -518,15 +626,13 @@ function completeMission(index, action) {
   } else if (challengeDone) {
     toast("이번 주 챌린지 달성! +50 XP");
   } else if (newBadges.length) {
-    toast("배지 획득: " + newBadges[0].name);
+    toast("열매 하나 맺혔어요: " + newBadges[0].name);
   } else {
     toast("+" + xp + " XP");
   }
 }
 
-/* --------------------------------------------
-   10. 쉬어가기
-   -------------------------------------------- */
+/* 10. 쉬어가기 */
 
 function restToday() {
   if (state.today.restUsed) {
@@ -545,14 +651,11 @@ function restToday() {
   toast(TONE.restDone);
 }
 
-/* --------------------------------------------
-   11. 설정
-   -------------------------------------------- */
+/* 11. 설정 */
 
 function renderSettings() {
   $("setting-nickname").textContent = state.profile.nickname || "-";
-  $("setting-ageband").textContent =
-    AGE_BANDS[state.profile.ageBand] || "-";
+  $("setting-ageband").textContent = AGE_BANDS[state.profile.ageBand] || "-";
   $("setting-area").textContent =
     AREAS[state.profile.focusArea] ? AREAS[state.profile.focusArea].name : "-";
 }
@@ -565,14 +668,12 @@ function setupSettings() {
   });
 
   $("btn-export").addEventListener("click", function () {
-    exportState();
-    toast("내 데이터를 내려받았어요");
+    exportSummary();
+    toast("기록을 저장했어요");
   });
 
   $("btn-reset").addEventListener("click", function () {
-    const ok = confirm(
-      "모든 기록이 지워집니다. 되돌릴 수 없어요.\n정말 삭제할까요?"
-    );
+    const ok = confirm("모든 기록이 지워집니다. 되돌릴 수 없어요.\n정말 삭제할까요?");
     if (!ok) {
       return;
     }
@@ -585,9 +686,7 @@ function setupSettings() {
   });
 }
 
-/* --------------------------------------------
-   12. 버튼 연결
-   -------------------------------------------- */
+/* 12. 버튼 연결 */
 
 function setupNavigation() {
   document.querySelectorAll("[data-go]").forEach(function (btn) {
@@ -596,6 +695,7 @@ function setupNavigation() {
 
       if (target === "onboarding") {
         gotoOnboardStep(1);
+        $("input-nickname").value = state.profile.nickname || "";
         goto("onboarding");
         return;
       }
@@ -659,9 +759,7 @@ function setupDashboard() {
   });
 }
 
-/* --------------------------------------------
-   13. 시작
-   -------------------------------------------- */
+/* 13. 시작 */
 
 function init() {
   state = loadState();
@@ -673,13 +771,11 @@ function init() {
   setupModal();
   setupSettings();
 
-  // 하루가 지났으면 오늘 칸을 비웁니다.
   if (isNewDay(state)) {
     resetToday(state);
     saveState(state);
   }
 
-  // 처음 온 분은 랜딩, 다시 온 분은 대시보드로.
   if (state.flags.onboardingDone) {
     renderDashboard();
     goto("dashboard");
@@ -689,5 +785,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
 
