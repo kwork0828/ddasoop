@@ -17,6 +17,8 @@
   --line: #e4e0d9;
   --danger: #c0574f;
   --danger-light: #fbeceb;
+  --caution: #8a6d1f;
+  --caution-light: #fdf6e3;
 
   --radius: 16px;
   --radius-sm: 10px;
@@ -110,6 +112,7 @@ ol, ul {
   font-size: 14px;
   color: var(--ink-soft);
   border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .header-nav button:hover {
@@ -739,6 +742,203 @@ ol, ul {
   font-weight: 700;
 }
 
+/* ============================================
+   마음 쉼터 (AI)
+   ============================================ */
+
+.ai-intro {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+
+.ai-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.ai-label + .ai-select,
+.ai-label + .ai-textarea {
+  margin-top: 8px;
+}
+
+.ai-form .ai-label + .ai-label,
+.ai-count + .ai-label {
+  margin-top: 20px;
+}
+
+.ai-select,
+.ai-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+.ai-select {
+  min-height: var(--tap);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%),
+                    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% + 2px),
+                       calc(100% - 14px) calc(50% + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 44px;
+}
+
+.ai-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.ai-select:focus,
+.ai-textarea:focus {
+  outline: none;
+  border-color: var(--forest);
+}
+
+.ai-select:disabled,
+.ai-textarea:disabled {
+  background: var(--paper);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.ai-textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+.ai-count {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink-faint);
+  text-align: right;
+}
+
+.ai-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ai-actions .btn {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+}
+
+.card .ai-actions .btn {
+  margin-top: 0;
+}
+
+.ai-status {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  word-break: keep-all;
+}
+
+.ai-status.is-loading {
+  background: var(--forest-light);
+  border-color: transparent;
+  color: var(--forest-dark);
+  font-weight: 600;
+}
+
+.ai-status.is-ok {
+  background: var(--forest-light);
+  border-color: transparent;
+  color: var(--forest-dark);
+  font-weight: 600;
+}
+
+.ai-status.is-warn {
+  background: var(--caution-light);
+  border-color: #f0e3bf;
+  color: var(--caution);
+  font-weight: 600;
+}
+
+.ai-status.is-error {
+  background: var(--danger-light);
+  border-color: #f0d4d1;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+#ai-result {
+  margin-top: 16px;
+}
+
+.ai-result-body {
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+
+.ai-history {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-history-item {
+  padding: 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.ai-history-meta {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--forest);
+  letter-spacing: 0.03em;
+}
+
+.ai-history-body {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+
+.ai-note {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--ink-faint);
+  word-break: keep-all;
+}
+
 /* 모달 */
 .modal {
   position: fixed;
@@ -862,6 +1062,17 @@ ol, ul {
    반응형
    ============================================ */
 
+@media (max-width: 400px) {
+  .header-nav {
+    gap: 0;
+  }
+
+  .header-nav button {
+    padding: 8px 7px;
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 360px) {
   .landing-title {
     font-size: 42px;
@@ -874,6 +1085,14 @@ ol, ul {
 
   .choice-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ai-actions {
+    flex-direction: column;
+  }
+
+  .ai-actions .btn {
+    width: 100%;
   }
 }
 
@@ -900,6 +1119,10 @@ ol, ul {
 
   .tree-art {
     max-width: 320px;
+  }
+
+  .ai-textarea {
+    min-height: 140px;
   }
 
   .modal {
@@ -930,3 +1153,4 @@ ol, ul {
     animation: none !important;
   }
 }
+

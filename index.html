@@ -17,6 +17,7 @@
     <nav class="header-nav">
       <button type="button" data-go="dashboard">홈</button>
       <button type="button" data-go="check">오늘의 체크</button>
+      <button type="button" data-go="ai">마음 쉼터</button>
       <button type="button" data-go="settings">설정</button>
     </nav>
   </header>
@@ -201,6 +202,20 @@
         </button>
       </div>
 
+      <!-- 마음 쉼터 안내 (AI 화면 진입 카드) -->
+      <div class="section-block">
+        <h2 class="section-title">마음 쉼터</h2>
+        <div class="card">
+          <p class="card-desc">
+            오늘 부모님 마음은 어떠셨나요?<br>
+            한 줄 적으면 오늘의 쉼 처방을 만들어 드려요.
+          </p>
+          <button type="button" class="btn btn-secondary" data-go="ai">
+            마음 한 줄 적기
+          </button>
+        </div>
+      </div>
+
       <!-- 오늘의 말씀 -->
       <div class="section-block">
         <h2 class="section-title">오늘의 말씀</h2>
@@ -282,6 +297,8 @@
         <p class="card-desc">
           따숲은 아이 정보를 서버에 저장하지 않습니다.<br>
           모든 기록은 이 브라우저 안에만 있습니다.<br><br>
+          다만 마음 쉼터에 적으신 문장은 처방을 만드는 동안에만<br>
+          AI 서버로 전송되며, 어디에도 저장되지 않습니다.<br><br>
           아래 버튼은 지금까지의 기록을 읽기 쉬운 글로 정리해<br>
           이 기기에 저장합니다. 어디로도 전송되지 않습니다.
         </p>
@@ -292,6 +309,68 @@
           전체 삭제
         </button>
       </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- 화면 7 : 마음 쉼터 (AI)                                 -->
+    <!-- ===================================================== -->
+    <section id="view-ai" class="view">
+      <h2 class="section-title">마음 쉼터</h2>
+      <p class="card-desc ai-intro">
+        지금 마음을 한 줄 적으면, 오늘의 쉼 처방을 만들어 드려요.<br>
+        아이 이름이나 진단명은 적지 않으셔도 됩니다.
+      </p>
+
+      <div class="card">
+        <form id="ai-form" class="ai-form" novalidate>
+          <label class="ai-label" for="ai-mood">지금 기분</label>
+          <select id="ai-mood" name="mood" class="ai-select">
+            <option value="지침">지침</option>
+            <option value="불안">불안</option>
+            <option value="답답함">답답함</option>
+            <option value="무기력">무기력</option>
+            <option value="미안함">미안함</option>
+            <option value="괜찮음">괜찮음</option>
+          </select>
+
+          <label class="ai-label" for="ai-input">마음 한 줄</label>
+          <textarea
+            id="ai-input"
+            name="text"
+            class="ai-textarea"
+            rows="4"
+            maxlength="300"
+            placeholder="예) 오늘 하루 종일 마음이 급했고, 저녁에 괜히 크게 말했어요."></textarea>
+          <p class="ai-count"><span id="ai-count">0</span> / 300</p>
+
+          <div class="ai-actions">
+            <button type="submit" class="btn btn-primary" id="ai-submit">쉼 처방 받기</button>
+            <button type="button" class="btn btn-text" id="ai-reset">지우기</button>
+          </div>
+        </form>
+      </div>
+
+      <p id="ai-status" class="ai-status is-hidden" role="status" aria-live="polite"></p>
+
+      <div id="ai-result" class="card card-verse is-hidden">
+        <h3 class="card-title">오늘의 쉼 처방</h3>
+        <p id="ai-result-body" class="ai-result-body"></p>
+        <div class="ai-actions">
+          <button type="button" class="btn btn-secondary" id="ai-save">기록에 저장</button>
+          <button type="button" class="btn btn-text" id="ai-copy">복사</button>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2 class="section-title">지난 쉼 처방</h2>
+        <div class="card">
+          <ul id="ai-history" class="ai-history"></ul>
+        </div>
+      </div>
+
+      <p class="ai-note">
+        마음 쉼터는 정서적 지지를 위한 참고용이며, 상담이나 치료를 대체하지 않습니다.
+      </p>
     </section>
 
   </main>
@@ -342,5 +421,6 @@
   <script src="js/fallback.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/ai.js"></script>
 </body>
 </html>
