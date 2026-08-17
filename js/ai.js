@@ -7,7 +7,7 @@
 (function () {
   "use strict";
 
-  var TIMEOUT_MS = 25000;
+  var TIMEOUT_MS = 50000;
   var STORAGE_KEY = "ddasoop.ai.history";
   var MAX_HISTORY = 10;
 

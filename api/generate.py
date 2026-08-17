@@ -12,13 +12,14 @@ import os
 
 import requests
 
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "gemini-flash-latest"
+
 API_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     + MODEL_NAME
     + ":generateContent"
 )
-TIMEOUT_SECONDS = 20
+TIMEOUT_SECONDS = 45
 MAX_NOTE_LENGTH = 500
 
 PROMPT_RULE = """너는 '따숲'이라는 마음 돌봄 서비스의 따뜻한 안내자다.
@@ -30,6 +31,7 @@ PROMPT_RULE = """너는 '따숲'이라는 마음 돌봄 서비스의 따뜻한 �
 - 의학적 진단이나 치료 조언은 하지 않는다.
 - message는 두 문장 이내, action은 한 문장으로 쓴다.
 - keyword는 오늘의 기분을 담은 한글 단어 하나로 쓴다.
+- 설명이나 사고 과정은 절대 쓰지 말고, JSON 객체 하나만 출력한다.
 
 반드시 아래 JSON 형식으로만 답하라.
 {"title": "...", "message": "...", "action": "...", "keyword": "..."}
@@ -48,13 +50,14 @@ def build_prompt(mood, note, mission):
 
 
 def call_gemini(api_key, prompt):
-    """Gemini API를 호출하고 파싱된 결과를 돌려준다."""
+    """Gemini API를 호출하고 응답 객체를 그대로 돌려준다."""
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "temperature": 0.9,
-            "maxOutputTokens": 512,
+            "maxOutputTokens": 2048,
             "responseMimeType": "application/json",
+            "thinkingConfig": {"thinkingBudget": 0},
         },
     }
     headers = {
@@ -69,15 +72,37 @@ def call_gemini(api_key, prompt):
     )
 
 
+def strip_fence(text):
+    """```json 같은 코드펜스를 벗겨낸다."""
+    t = (text or "").strip()
+    if t.startswith("```"):
+        t = t.split("\n", 1)[-1]
+        if "```" in t:
+            t = t[: t.rfind("```")]
+    return t.strip()
+
+
 def extract_text(gemini_json):
-    """Gemini 응답 껍데기를 벗겨 실제 텍스트만 꺼낸다."""
-    candidates = gemini_json.get("candidates") or []
-    if not candidates:
+    """생각(thought) 조각은 건너뛰고 실제 답변 텍스트만 이어 붙인다."""
+    chunks = []
+    for cand in gemini_json.get("candidates") or []:
+        parts = (cand.get("content") or {}).get("parts") or []
+        for part in parts:
+            if part.get("thought"):
+                continue
+            piece = part.get("text")
+            if piece:
+                chunks.append(piece)
+    return strip_fence("".join(chunks))
+
+
+def pick_json_block(text):
+    """텍스트에 설명이 섞여 있어도 가장 바깥 JSON 객체만 잘라낸다."""
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
         return ""
-    parts = candidates[0].get("content", {}).get("parts") or []
-    if not parts:
-        return ""
-    return parts[0].get("text", "")
+    return text[start : end + 1]
 
 
 class handler(BaseHTTPRequestHandler):
@@ -170,20 +195,35 @@ class handler(BaseHTTPRequestHandler):
             return
 
         if res.status_code >= 400:
+            detail = ""
+            try:
+                detail = str(res.json().get("error", {}).get("message", ""))[:200]
+            except ValueError:
+                detail = res.text[:200]
+            print("[GEMINI ERROR]", res.status_code, detail)
             self._fail(
                 502,
                 "UPSTREAM_ERROR",
-                "AI 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.",
+                "AI 응답을 받지 못했어요. ("
+                + str(res.status_code)
+                + ") 잠시 후 다시 시도해 주세요.",
             )
             return
 
         # 6) 응답 파싱
         try:
-            text = extract_text(res.json())
+            gemini_json = res.json()
         except ValueError:
-            text = ""
+            gemini_json = {}
+
+        text = extract_text(gemini_json)
+        print("[GEMINI RAW]", text[:200])
 
         if not text:
+            reason = ""
+            for cand in gemini_json.get("candidates") or []:
+                reason = str(cand.get("finishReason", ""))
+            print("[GEMINI EMPTY] finishReason =", reason)
             self._fail(
                 502,
                 "EMPTY_RESULT",
@@ -191,10 +231,19 @@ class handler(BaseHTTPRequestHandler):
             )
             return
 
+        data = None
         try:
             data = json.loads(text)
         except ValueError:
-            # AI가 JSON을 어겼을 때의 대비책
+            block = pick_json_block(text)
+            if block:
+                try:
+                    data = json.loads(block)
+                except ValueError:
+                    data = None
+
+        if not isinstance(data, dict):
+            # AI가 JSON 형식을 어겼을 때의 대비책
             data = {
                 "title": "오늘의 쉼",
                 "message": text.strip()[:200],
