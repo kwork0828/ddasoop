@@ -1,5 +1,9 @@
-/* 따숲 - 마음 쉼터 (AI 기능)
-   POST /api/generate 호출 · 빈 입력 / API 오류 / 타임아웃 처리 · localStorage 저장 */
+/* 따숲 - 마음 쉼터 (AI)
+   POST /api/generate
+   보내는 값 : { mood, note, mission }
+   받는 값   : { ok: true, data: { title, message, action, keyword } }
+             { ok: false, code, message }
+*/
 (function () {
   "use strict";
 
@@ -16,13 +20,20 @@
   var submitEl = document.getElementById("ai-submit");
   var resetEl = document.getElementById("ai-reset");
   var statusEl = document.getElementById("ai-status");
+
   var resultEl = document.getElementById("ai-result");
-  var resultBodyEl = document.getElementById("ai-result-body");
+  var keywordEl = document.getElementById("ai-keyword");
+  var titleEl = document.getElementById("ai-result-title");
+  var messageEl = document.getElementById("ai-result-message");
+  var actionEl = document.getElementById("ai-result-action");
+
   var saveEl = document.getElementById("ai-save");
   var copyEl = document.getElementById("ai-copy");
   var historyEl = document.getElementById("ai-history");
 
   var lastResult = null;
+
+  /* ---------- 상태 표시 ---------- */
 
   function showStatus(message, kind) {
     statusEl.textContent = message;
@@ -42,6 +53,8 @@
     moodEl.disabled = isLoading;
     submitEl.textContent = isLoading ? "처방 받는 중..." : "쉼 처방 받기";
   }
+
+  /* ---------- 저장소 ---------- */
 
   function readHistory() {
     try {
@@ -87,27 +100,35 @@
 
       var meta = document.createElement("p");
       meta.className = "ai-history-meta";
-      meta.textContent = formatDate(item.date) + " · " + (item.mood || "");
+      meta.textContent = formatDate(item.date) + " · " + (item.mood || "") +
+                         (item.keyword ? " · " + item.keyword : "");
 
       var body = document.createElement("p");
       body.className = "ai-history-body";
-      body.textContent = item.result || "";
+      body.textContent = item.message || "";
 
       li.appendChild(meta);
       li.appendChild(body);
+
+      if (item.action) {
+        var act = document.createElement("p");
+        act.className = "ai-history-action";
+        act.textContent = "→ " + item.action;
+        li.appendChild(act);
+      }
+
       historyEl.appendChild(li);
     });
   }
 
-  function pickText(data) {
-    if (!data || typeof data !== "object") return "";
-    var keys = ["result", "text", "message", "content", "output"];
-    for (var i = 0; i < keys.length; i++) {
-      var v = data[keys[i]];
-      if (typeof v === "string" && v.trim()) return v.trim();
-    }
-    return "";
+  /* ---------- 진행 중인 미션 (있으면 같이 보냄) ---------- */
+
+  function currentMission() {
+    var el = document.querySelector("#mission-list .mission-title");
+    return el ? el.textContent.trim().slice(0, 60) : "";
   }
+
+  /* ---------- 서버 호출 ---------- */
 
   function requestPrescription(payload) {
     var controller = new AbortController();
@@ -121,29 +142,35 @@
     })
       .then(function (res) {
         return res.text().then(function (raw) {
-          var data = null;
-          try { data = raw ? JSON.parse(raw) : null; } catch (err) { data = null; }
-          if (!res.ok) {
-            throw new Error((data && (data.error || data.message)) || ("서버 오류 (" + res.status + ")"));
+          var json = null;
+          try { json = raw ? JSON.parse(raw) : null; } catch (err) { json = null; }
+
+          if (!json) throw new Error("서버 응답을 읽지 못했어요.");
+          if (!res.ok || json.ok !== true) {
+            throw new Error(json.message || ("서버 오류 (" + res.status + ")"));
           }
-          if (!data) throw new Error("서버 응답을 읽지 못했어요.");
-          return data;
+          if (!json.data || !json.data.message) {
+            throw new Error("이번엔 답을 만들지 못했어요. 다시 시도해 주세요.");
+          }
+          return json.data;
         });
       })
       .then(function (data) { clearTimeout(timer); return data; })
       .catch(function (err) { clearTimeout(timer); throw err; });
   }
 
+  /* ---------- 제출 ---------- */
+
   form.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    var text = inputEl.value.trim();
-    if (text.length === 0) {
+    var note = inputEl.value.trim();
+    if (note.length === 0) {
       showStatus("마음 한 줄을 먼저 적어주세요.", "warn");
       inputEl.focus();
       return;
     }
-    if (text.length < 5) {
+    if (note.length < 5) {
       showStatus("조금만 더 적어주시면 처방이 정확해져요. (5자 이상)", "warn");
       inputEl.focus();
       return;
@@ -153,18 +180,29 @@
     setLoading(true);
     showStatus("마음을 읽고 있어요...", "loading");
 
-    requestPrescription({ mood: moodEl.value, text: text })
+    requestPrescription({
+      mood: moodEl.value,
+      note: note,
+      mission: currentMission()
+    })
       .then(function (data) {
-        var output = pickText(data);
-        if (!output) throw new Error("처방 내용이 비어 있어요. 다시 시도해 주세요.");
-
         lastResult = {
           date: new Date().toISOString(),
           mood: moodEl.value,
-          input: text,
-          result: output
+          note: note,
+          title: data.title || "오늘의 쉼",
+          message: data.message || "",
+          action: data.action || "",
+          keyword: data.keyword || ""
         };
-        resultBodyEl.textContent = output;
+
+        keywordEl.textContent = lastResult.keyword;
+        keywordEl.style.display = lastResult.keyword ? "" : "none";
+        titleEl.textContent = lastResult.title;
+        messageEl.textContent = lastResult.message;
+        actionEl.textContent = lastResult.action;
+        actionEl.parentNode.style.display = lastResult.action ? "" : "none";
+
         resultEl.classList.remove("is-hidden");
         hideStatus();
       })
@@ -183,6 +221,8 @@
       })
       .then(function () { setLoading(false); });
   });
+
+  /* ---------- 보조 버튼 ---------- */
 
   resetEl.addEventListener("click", function () {
     inputEl.value = "";
@@ -207,8 +247,10 @@
 
   copyEl.addEventListener("click", function () {
     if (!lastResult) return;
+    var text = lastResult.title + "\n\n" + lastResult.message +
+               (lastResult.action ? "\n\n오늘의 한 걸음: " + lastResult.action : "");
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(lastResult.result).then(
+      navigator.clipboard.writeText(text).then(
         function () { showStatus("복사했어요.", "ok"); },
         function () { showStatus("복사에 실패했어요.", "error"); }
       );
@@ -224,3 +266,4 @@
 
   renderHistory();
 })();
+

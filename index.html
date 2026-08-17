@@ -351,10 +351,16 @@
       </div>
 
       <p id="ai-status" class="ai-status is-hidden" role="status" aria-live="polite"></p>
+            <div id="ai-result" class="card card-verse is-hidden">
+        <p class="ai-keyword" id="ai-keyword"></p>
+        <h3 class="ai-result-title" id="ai-result-title"></h3>
+        <p class="ai-result-body" id="ai-result-message"></p>
 
-      <div id="ai-result" class="card card-verse is-hidden">
-        <h3 class="card-title">오늘의 쉼 처방</h3>
-        <p id="ai-result-body" class="ai-result-body"></p>
+        <div class="ai-result-action">
+          <h4 class="ai-action-label">오늘의 한 걸음</h4>
+          <p id="ai-result-action"></p>
+        </div>
+
         <div class="ai-actions">
           <button type="button" class="btn btn-secondary" id="ai-save">기록에 저장</button>
           <button type="button" class="btn btn-text" id="ai-copy">복사</button>

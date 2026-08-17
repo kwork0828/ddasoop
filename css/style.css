@@ -1154,3 +1154,54 @@ ol, ul {
   }
 }
 
+/* ===== 마음 쉼터 결과 카드 (추가) ===== */
+.ai-keyword {
+  display: inline-block;
+  padding: 5px 12px;
+  margin-bottom: 10px;
+  background: var(--warm-light);
+  color: #a86a3d;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ai-result-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--forest-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.ai-result-action {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+}
+
+.ai-action-label {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warm);
+  letter-spacing: 0.04em;
+}
+
+.ai-result-action p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--ink);
+  word-break: keep-all;
+}
+
+.ai-history-action {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--forest);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
