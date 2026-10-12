@@ -447,7 +447,10 @@ function buildSummaryText() {
   if (recent.length === 0) {
     lines.push("아직 기록이 없어요.");
   } else {
-    const actionName = { tried: "시도했어요", done: "해냈어요", rest: "쉬어갔어요" };
+    const actionName = {
+      tried: "시도했어요", done: "해냈어요", rest: "쉬어갔어요",
+      abc: "행동 기록", practice: "실천 체크", coach: "상황 코칭"
+    };
     recent.forEach(function (log) {
       const areaName = log.area && AREAS[log.area] ? AREAS[log.area].short : "쉼";
       lines.push(log.date + "  " + areaName + "  " + (actionName[log.action] || log.action));
@@ -478,5 +481,15 @@ function exportSummary() {
 }
 
 function clearAll() {
-  localStorage.removeItem(STORAGE_KEY);
+  // 따숲이 만든 모든 항목(기록, 행동 기록, 코칭, 실천)을 지운다
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && /^ddasoop[._]/.test(k)) {
+      keys.push(k);
+    }
+  }
+  keys.forEach(function (k) {
+    localStorage.removeItem(k);
+  });
 }

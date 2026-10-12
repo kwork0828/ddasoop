@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "따숲 - 하루 3분, 마음이 따숲",
+  "short_name": "따숲",
+  "description": "자폐·발달장애 아이 부모를 위한 하루 3분 홈코칭. 행동 기록, 상황 코칭, 오늘의 실천.",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf8f5",
+  "theme_color": "#3d7a5f",
+  "categories": ["education", "health", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "행동 기록",
+      "short_name": "기록",
+      "url": "/?go=behavior",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

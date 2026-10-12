@@ -776,7 +776,20 @@ function init() {
     saveState(state);
   }
 
-  if (state.flags.onboardingDone) {
+  // 홈 화면 아이콘 길게 누르기 → "행동 기록" 바로가기
+  const params = new URLSearchParams(location.search);
+  const jump = params.get("go");
+  if (params.has("go") || params.has("source")) {
+    history.replaceState(null, "", location.pathname);
+  }
+
+  if (state.flags.onboardingDone && jump === "behavior") {
+    renderDashboard();
+    goto("behavior");
+    if (window.ddasoopBehavior) {
+      window.ddasoopBehavior.render();
+    }
+  } else if (state.flags.onboardingDone) {
     renderDashboard();
     goto("dashboard");
   } else {

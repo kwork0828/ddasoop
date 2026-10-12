@@ -2,9 +2,20 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>따숲 - 하루 3분, 마음이 따숲</title>
   <meta name="description" content="지친 부모를 위한 하루 3분 홈코칭. 체크 4개만 누르면 오늘의 미션이 준비됩니다.">
+
+  <!-- 폰 홈 화면 설치(PWA) -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#3d7a5f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="따숲">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,13 +25,21 @@
   <!-- ===================================================== -->
   <header id="app-header" class="app-header is-hidden">
     <button type="button" class="header-logo" data-go="landing">따숲</button>
-    <nav class="header-nav">
+    <span id="offline-badge" class="offline-badge is-hidden">오프라인</span>
+    <nav class="header-nav" aria-label="주요 메뉴">
       <button type="button" data-go="dashboard">홈</button>
-      <button type="button" data-go="check">오늘의 체크</button>
+      <button type="button" data-go="check">오늘 체크</button>
+      <button type="button" data-go="behavior">행동 코칭</button>
       <button type="button" data-go="ai">마음 쉼터</button>
       <button type="button" data-go="settings">설정</button>
     </nav>
   </header>
+
+  <!-- 새 버전 알림 : 사용자가 누를 때만 바뀜 -->
+  <div id="update-bar" class="update-bar is-hidden" role="status">
+    <span>새 버전이 준비됐어요.</span>
+    <button type="button" id="btn-update-now">업데이트</button>
+  </div>
 
   <main id="app-main">
 
@@ -31,6 +50,7 @@
       <div class="landing-badges">
         <span class="badge">회원가입 없음</span>
         <span class="badge">서버에 저장하지 않습니다</span>
+        <span class="badge">폰에 설치해서 써요</span>
       </div>
 
       <h1 class="landing-title">따숲</h1>
@@ -160,6 +180,28 @@
           <div class="progress-fill" id="xp-fill"></div>
         </div>
         <p class="xp-text" id="xp-text">0 / 100 XP</p>
+      </div>
+
+      <!-- 백업 알림 : 기록이 있고 7일 넘게 백업 안 했을 때 -->
+      <div id="backup-remind" class="card card-notice is-hidden">
+        <p>기록은 이 폰에만 있어요. 폰을 바꾸거나 앱을 지우면 사라지니, 일주일에 한 번 백업해 두세요.</p>
+        <button type="button" class="btn btn-secondary btn-sm" data-backup-now>지금 백업하기</button>
+      </div>
+
+      <!-- 홈 화면 설치 안내 : 설치하면 사라짐 -->
+      <div class="card card-install is-hidden" data-install-card data-hide-when-installed>
+        <h2 class="card-title">폰에 앱처럼 설치하기</h2>
+        <p class="card-desc" data-install-guide></p>
+        <button type="button" class="btn btn-primary is-hidden" data-install-btn>홈 화면에 설치</button>
+      </div>
+
+      <!-- 행동 코칭 : 이번 주 실천 -->
+      <div class="section-block">
+        <h2 class="section-title">이번 주 행동 실천</h2>
+        <div class="card">
+          <div id="dash-practice" class="bh-practice"></div>
+          <button type="button" class="btn btn-secondary" data-go="behavior">행동 기록 · 상황 코칭</button>
+        </div>
       </div>
 
       <!-- 우리의 숲 -->
@@ -292,13 +334,33 @@
         </button>
       </div>
 
+      <div class="card is-hidden" data-install-card>
+        <h3 class="card-title">앱 설치</h3>
+        <p class="card-desc" data-install-guide></p>
+        <p class="card-desc is-hidden" data-install-done>홈 화면 앱으로 쓰고 계세요. 인터넷이 없어도 기록할 수 있어요.</p>
+        <button type="button" class="btn btn-primary is-hidden" data-install-btn>홈 화면에 설치</button>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">백업 · 복원</h3>
+        <p class="card-desc">
+          모든 기록은 이 폰 안에만 있어요. 폰을 바꾸거나 앱을 지우기 전에<br>
+          백업 파일을 만들어 카톡 '나에게 보내기'나 드라이브에 저장해 두세요.
+        </p>
+        <p class="card-desc backup-last" id="backup-last"></p>
+        <button type="button" class="btn btn-primary" id="btn-backup-export">백업 파일 만들기</button>
+        <button type="button" class="btn btn-secondary" id="btn-backup-import">백업 파일로 복원</button>
+        <input type="file" id="input-backup-file" accept="application/json,.json" class="is-hidden">
+      </div>
+
       <div class="card">
         <h3 class="card-title">내 데이터</h3>
         <p class="card-desc">
           따숲은 아이 정보를 서버에 저장하지 않습니다.<br>
           모든 기록은 이 브라우저 안에만 있습니다.<br><br>
-          다만 마음 쉼터에 적으신 문장은 처방을 만드는 동안에만<br>
-          AI 서버로 전송되며, 어디에도 저장되지 않습니다.<br><br>
+          다만 마음 쉼터와 상황 코칭에 적으신 문장은 답을 만드는 동안에만<br>
+          AI 서버로 전송되며, 어디에도 저장되지 않습니다.<br>
+          상황 코칭은 보내기 전에 아이 별명과 가릴 이름을 [아이] [이름1]로 바꿉니다.<br><br>
           아래 버튼은 지금까지의 기록을 읽기 쉬운 글로 정리해<br>
           이 기기에 저장합니다. 어디로도 전송되지 않습니다.
         </p>
@@ -379,6 +441,115 @@
       </p>
     </section>
 
+    <!-- ===================================================== -->
+    <!-- 화면 8 : 행동 코칭 (ABC 기록 · 패턴 · 상황 코칭)          -->
+    <!-- ===================================================== -->
+    <section id="view-behavior" class="view">
+      <h2 class="section-title">행동 코칭</h2>
+
+      <div class="card">
+        <h3 class="card-title">이번 주 실천 딱 1개</h3>
+        <div id="bh-practice" class="bh-practice"></div>
+      </div>
+
+      <div class="bh-tabs" role="tablist" aria-label="행동 코칭 메뉴">
+        <button type="button" class="bh-tab" data-tab="log" role="tab">기록</button>
+        <button type="button" class="bh-tab" data-tab="pattern" role="tab">패턴</button>
+        <button type="button" class="bh-tab" data-tab="coach" role="tab">상황 코칭</button>
+      </div>
+
+      <!-- 기록 -->
+      <div id="bh-panel-log" class="bh-panel" role="tabpanel">
+        <p class="card-desc">방금 있었던 일 하나만, 세 번 누르면 끝나요.</p>
+
+        <div id="bh-insight" class="bh-insight is-hidden" role="status" aria-live="polite"></div>
+
+        <div class="bh-band">
+          <p class="bh-band-head"><span class="bh-mark">A</span>바로 전에 무슨 일이 있었나요</p>
+          <div class="bh-chips" id="bh-chips-a"></div>
+        </div>
+        <div class="bh-band">
+          <p class="bh-band-head"><span class="bh-mark">B</span>아이가 보인 행동</p>
+          <div class="bh-chips" id="bh-chips-b"></div>
+        </div>
+        <div class="bh-band">
+          <p class="bh-band-head"><span class="bh-mark">C</span>그래서 어떻게 됐나요</p>
+          <div class="bh-chips" id="bh-chips-c"></div>
+          <label class="sr-only" for="bh-note">덧붙일 말</label>
+          <textarea id="bh-note" class="ai-textarea bh-note" rows="2" maxlength="140"
+            placeholder="덧붙일 말 한 줄 (선택) 예: 점심 먹기 직전, 선생님이 색칠하자고 함"></textarea>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg" id="bh-save" disabled>기록 저장</button>
+
+        <div class="section-block">
+          <h3 class="section-title">오늘 기록 <span id="bh-today-count" class="bh-count">0건</span></h3>
+          <ul id="bh-log" class="bh-log"></ul>
+          <p id="bh-empty" class="empty-text">아직 오늘 기록이 없어요.</p>
+        </div>
+      </div>
+
+      <!-- 패턴 -->
+      <div id="bh-panel-pattern" class="bh-panel is-hidden" role="tabpanel">
+        <p class="card-desc" id="bh-pattern-n"></p>
+        <div class="card">
+          <h3 class="card-title">자주 나온 직전 상황</h3>
+          <div id="bh-bars-a"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">그 뒤에 자주 일어난 일</h3>
+          <div id="bh-bars-c"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">왜 그럴까 (가설)</h3>
+          <div id="bh-hypo"></div>
+        </div>
+      </div>
+
+      <!-- 상황 코칭 -->
+      <div id="bh-panel-coach" class="bh-panel is-hidden" role="tabpanel">
+        <p class="card-desc">
+          유치원 알림장, 음성메모 녹취, 카톡 내용을 그대로 붙여 넣으세요.<br>
+          ABC로 정리하고 가설, 이번 주 실천 1개, 선생님께 보낼 메시지까지 만들어 드려요.
+        </p>
+        <div class="card">
+          <form id="bh-coach-form" class="ai-form" novalidate>
+            <label class="ai-label" for="bh-coach-input">있었던 일</label>
+            <textarea id="bh-coach-input" class="ai-textarea" rows="7" maxlength="2000"
+              placeholder="예) 오늘 유치원에서 선생님이 시킨 걸 하기 싫었는지 종이를 다 찢고, 선생님 얼굴을 꼬집으려 하고, 친구들 식판에 침을 뱉었대요. 선생님이 많이 혼냈다고 하세요."></textarea>
+            <p class="ai-count"><span id="bh-coach-count">0</span> / 2000</p>
+
+            <label class="ai-label" for="bh-coach-names">AI에 보내지 않을 이름 (선택)</label>
+            <input type="text" id="bh-coach-names" class="input-text bh-names" maxlength="100"
+              placeholder="예: 시온, 지온, 김선생 (쉼표로 구분)" autocomplete="off">
+            <p class="step-help">아이 별명과 여기 적은 이름은 [아이] [이름1]로 바꿔서 보내고, 답은 이 폰에서만 원래 이름으로 보여드려요.</p>
+
+            <label class="bh-check-row">
+              <input type="checkbox" id="bh-coach-pattern" checked>
+              최근 기록 숫자 요약도 같이 보내기 (메모 내용은 안 보내요)
+            </label>
+
+            <button type="submit" class="btn btn-primary" id="bh-coach-submit">정리하고 코칭 받기</button>
+          </form>
+        </div>
+
+        <p id="bh-coach-status" class="ai-status is-hidden" role="status" aria-live="polite"></p>
+        <div id="bh-coach-result" class="card bh-coach-result is-hidden"></div>
+
+        <div class="section-block">
+          <h3 class="section-title">지난 코칭</h3>
+          <div class="card">
+            <ul id="bh-coach-history" class="ai-history"></ul>
+          </div>
+        </div>
+      </div>
+
+      <p class="ai-note">
+        행동 코칭은 기록 정리와 실천 제안을 위한 참고용이며, 진단이나 치료를 대체하지 않습니다.
+        다치는 수준의 행동이 반복되면 담당 치료사나 소아정신과와 먼저 상의해 주세요.
+      </p>
+    </section>
+
   </main>
 
   <!-- ===================================================== -->
@@ -428,5 +599,8 @@
   <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ai.js"></script>
+  <script src="js/behavior.js"></script>
+  <script src="js/backup.js"></script>
+  <script src="js/pwa.js"></script>
 </body>
 </html>
