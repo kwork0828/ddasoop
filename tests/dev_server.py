@@ -58,9 +58,12 @@ class Dev(coach.handler):
         super().end_headers()
 
     def do_GET(self):
+        if "share_text" in self.path:
+            LAST_PAYLOAD["share_hits"] = LAST_PAYLOAD.get("share_hits", 0) + 1
         path = self.path.split("?", 1)[0]
         if path == "/__last_prompt":
-            return self._send(200, {"prompt": LAST_PAYLOAD.get("prompt", "")})
+            return self._send(200, {"prompt": LAST_PAYLOAD.get("prompt", ""),
+                                    "share_hits": LAST_PAYLOAD.get("share_hits", 0)})
         if path == "/":
             path = "/index.html"
         full = os.path.abspath(os.path.join(ROOT, path.lstrip("/")))

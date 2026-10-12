@@ -1789,3 +1789,26 @@ select:focus-visible {
     grid-template-columns: 6em 1fr 3em;
   }
 }
+
+.bh-input-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bh-input-head .btn {
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 6px 4px;
+}
+
+.bh-share-tip {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--forest-light);
+  color: var(--forest-dark);
+  word-break: keep-all;
+}

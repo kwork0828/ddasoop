@@ -6,7 +6,7 @@
    - 배포할 때 VERSION 을 올리면 사용자 화면에 "업데이트" 버튼이 뜹니다.
    ============================================ */
 
-const VERSION = "2026-10-12.1";
+const VERSION = "2026-10-12.2";
 const CACHE = "ddasoop-" + VERSION;
 
 const SHELL = [
@@ -115,6 +115,15 @@ self.addEventListener("fetch", function (event) {
   if (url.pathname.indexOf("/api/") === 0) return;
 
   if (req.mode === "navigate") {
+    // 카톡 등에서 공유로 들어온 글(주소 뒤 ?share_text=...)은 서버로 보내지 않는다.
+    // 서버 접속 기록에 아이 이야기가 남지 않도록 기기에 저장된 화면으로 바로 연다.
+    if (url.searchParams.has("share_text") || url.searchParams.has("share_title") ||
+        url.searchParams.has("share_url")) {
+      event.respondWith(caches.match("/index.html").then(function (cached) {
+        return cached || fetch("/index.html");
+      }));
+      return;
+    }
     event.respondWith(networkFirstPage(req));
     return;
   }

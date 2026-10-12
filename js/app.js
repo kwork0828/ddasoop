@@ -779,11 +779,18 @@ function init() {
   // 홈 화면 아이콘 길게 누르기 → "행동 기록" 바로가기
   const params = new URLSearchParams(location.search);
   const jump = params.get("go");
-  if (params.has("go") || params.has("source")) {
+  const shared = [params.get("share_title"), params.get("share_text"), params.get("share_url")]
+    .filter(Boolean).join("\n").trim();
+  if (params.has("go") || params.has("source") || shared) {
+    // 공유받은 글이 주소창·방문기록에 남지 않도록 바로 지운다
     history.replaceState(null, "", location.pathname);
   }
 
-  if (state.flags.onboardingDone && jump === "behavior") {
+  if (shared && window.ddasoopBehavior) {
+    renderDashboard();
+    goto("behavior");
+    window.ddasoopBehavior.openCoachWith(shared);
+  } else if (state.flags.onboardingDone && jump === "behavior") {
     renderDashboard();
     goto("behavior");
     if (window.ddasoopBehavior) {

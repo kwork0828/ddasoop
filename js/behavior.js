@@ -830,6 +830,7 @@
       $("bh-coach-count").textContent = String($("bh-coach-input").value.length);
     });
     $("bh-coach-names").value = readJson(NAMES_KEY, "") || "";
+    $("bh-coach-paste").addEventListener("click", pasteFromClipboard);
 
     document.querySelectorAll('[data-go="behavior"]').forEach(function (b) {
       b.addEventListener("click", render);
@@ -839,7 +840,35 @@
   }
 
   // 다른 스크립트(백업 복원, 테스트)에서 쓸 수 있게 최소한만 공개
+  /* 카톡 등에서 '공유 → 따숲'으로 들어온 글을 상황 코칭에 채워 넣는다 */
+  function openCoachWith(text) {
+    render();
+    setTab("coach");
+    var input = $("bh-coach-input");
+    input.value = String(text || "").slice(0, 2000);
+    $("bh-coach-count").textContent = String(input.value.length);
+    setCoachStatus("공유받은 내용을 넣었어요. 이름을 가릴지 확인하고 '정리하고 코칭 받기'를 누르세요.", "ok");
+    input.scrollIntoView({ block: "center" });
+  }
+
+  function pasteFromClipboard() {
+    if (!navigator.clipboard || !navigator.clipboard.readText) {
+      notify("이 브라우저는 붙여넣기 버튼을 지원하지 않아요. 입력칸을 길게 눌러 붙여넣어 주세요.");
+      return;
+    }
+    navigator.clipboard.readText().then(function (t) {
+      if (!t) { notify("복사된 글이 없어요."); return; }
+      var input = $("bh-coach-input");
+      input.value = (input.value ? input.value + "\n" : "") + t;
+      input.value = input.value.slice(0, 2000);
+      $("bh-coach-count").textContent = String(input.value.length);
+    }, function () {
+      notify("붙여넣기 권한이 없어요. 입력칸을 길게 눌러 붙여넣어 주세요.");
+    });
+  }
+
   window.ddasoopBehavior = {
+    openCoachWith: openCoachWith,
     analyze: analyze,
     patternSummary: patternSummary,
     applyMask: applyMask,

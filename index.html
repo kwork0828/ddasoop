@@ -512,9 +512,15 @@
           유치원 알림장, 음성메모 녹취, 카톡 내용을 그대로 붙여 넣으세요.<br>
           ABC로 정리하고 가설, 이번 주 실천 1개, 선생님께 보낼 메시지까지 만들어 드려요.
         </p>
+        <p class="card-desc bh-share-tip">
+          안드로이드에 앱을 설치했다면: 카톡 메시지 길게 누르기 → 공유 → <strong>따숲</strong>을 고르면 여기로 바로 들어와요.
+        </p>
         <div class="card">
           <form id="bh-coach-form" class="ai-form" novalidate>
-            <label class="ai-label" for="bh-coach-input">있었던 일</label>
+            <div class="bh-input-head">
+              <label class="ai-label" for="bh-coach-input">있었던 일</label>
+              <button type="button" class="btn btn-text btn-sm" id="bh-coach-paste">카톡 내용 붙여넣기</button>
+            </div>
             <textarea id="bh-coach-input" class="ai-textarea" rows="7" maxlength="2000"
               placeholder="예) 오늘 유치원에서 선생님이 시킨 걸 하기 싫었는지 종이를 다 찢고, 선생님 얼굴을 꼬집으려 하고, 친구들 식판에 침을 뱉었대요. 선생님이 많이 혼냈다고 하세요."></textarea>
             <p class="ai-count"><span id="bh-coach-count">0</span> / 2000</p>

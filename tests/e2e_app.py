@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import time
+import urllib.parse
 import urllib.request
 
 from playwright.sync_api import sync_playwright, expect
@@ -208,6 +209,15 @@ with sync_playwright() as p:
     page.goto(BASE + "/?go=behavior")
     expect(page.locator("#view-behavior")).to_be_visible()
     check("홈 화면 바로가기로 행동 기록 열기", "go=" not in page.url)
+
+    # 11-2) 카톡 공유로 들어오기: 글이 상황 코칭에 채워지고, 서버로는 안 감
+    msg = "선생님: 오늘 시온이가 블록 정리하자고 하니 친구를 밀었어요."
+    page.goto(BASE + "/?share_text=" + urllib.parse.quote(msg))
+    expect(page.locator("#bh-panel-coach")).to_be_visible()
+    check("공유받은 글이 입력칸에 채워짐", page.input_value("#bh-coach-input") == msg)
+    check("공유 후 주소창에서 글 삭제", "share_text" not in page.url)
+    hits = json.loads(urllib.request.urlopen(BASE + "/__last_prompt").read()).get("share_hits", 0)
+    check("공유받은 글이 서버 접속 기록에 안 남음", hits == 0, hits)
 
     # 12) 콘솔 오류 · CSP 위반 없음
     bad_msgs = [e for e in errors if "ERR_INTERNET_DISCONNECTED" not in e and "Failed to load resource" not in e]
