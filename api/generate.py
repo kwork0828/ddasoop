@@ -195,12 +195,8 @@ class handler(BaseHTTPRequestHandler):
             return
 
         if res.status_code >= 400:
-            detail = ""
-            try:
-                detail = str(res.json().get("error", {}).get("message", ""))[:200]
-            except ValueError:
-                detail = res.text[:200]
-            print("[GEMINI ERROR]", res.status_code, detail)
+            # 상태 코드만 남긴다. 사용자 입력이나 응답 본문은 로그에 남기지 않는다.
+            print("[GEMINI ERROR]", res.status_code)
             self._fail(
                 502,
                 "UPSTREAM_ERROR",
@@ -217,7 +213,6 @@ class handler(BaseHTTPRequestHandler):
             gemini_json = {}
 
         text = extract_text(gemini_json)
-        print("[GEMINI RAW]", text[:200])
 
         if not text:
             reason = ""
