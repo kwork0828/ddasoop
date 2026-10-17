@@ -13,6 +13,8 @@
 
   var ABC_KEY = "ddasoop.abc.v1";
   var PRACTICE_KEY = "ddasoop.practice.v1";
+  var ROUTINE_KEY = "ddasoop.routines.v1";
+  var MAX_ROUTINES = 10;
   var COACH_KEY = "ddasoop.coach.v1";
   var NAMES_KEY = "ddasoop.coach.names";
   var MAX_RECORDS = 3000;
@@ -334,7 +336,116 @@
     });
     try { sessionStorage.setItem("ddasoop.bh.tab", name); } catch (e) {}
     if (name === "pattern") renderPattern();
-    if (name === "coach") renderCoachHistory();
+  }
+
+  /* 상단 탭: 일일 루틴 / 고민·문제 */
+  function setTop(name) {
+    document.querySelectorAll(".top-tab").forEach(function (b) {
+      var on = b.dataset.top === name;
+      b.classList.toggle("is-current", on);
+      b.setAttribute("aria-selected", String(on));
+    });
+    $("top-routine").classList.toggle("is-hidden", name !== "routine");
+    $("top-concern").classList.toggle("is-hidden", name !== "concern");
+    try { sessionStorage.setItem("ddasoop.bh.top", name); } catch (e) {}
+    if (name === "concern") renderCoachHistory();
+    if (name === "routine") renderRoutines();
+  }
+
+  /* ---------- 일일 루틴 ---------- */
+
+  function dayKey(ts) {
+    var d = new Date(ts);
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+
+  function loadRoutines() {
+    var box = readJson(ROUTINE_KEY, null);
+    return box && Array.isArray(box.items) ? box.items : [];
+  }
+
+  function saveRoutines(items) {
+    writeJson(ROUTINE_KEY, { items: items });
+  }
+
+  function addRoutine(title, source) {
+    var clean = String(title || "").trim().slice(0, 60);
+    if (!clean) return false;
+    var items = loadRoutines();
+    if (items.some(function (r) { return r.title === clean; })) {
+      notify("이미 있는 루틴이에요");
+      return false;
+    }
+    if (items.length >= MAX_ROUTINES) {
+      notify("루틴은 " + MAX_ROUTINES + "개까지 넣을 수 있어요. 하나를 지우고 추가해 주세요.");
+      return false;
+    }
+    items.push({ id: newId(), title: clean, source: source || "manual", createdAt: Date.now(), days: [] });
+    saveRoutines(items);
+    renderRoutines();
+    notify("루틴에 추가했어요");
+    return true;
+  }
+
+  function toggleRoutine(id) {
+    var items = loadRoutines();
+    var today = dayKey(Date.now());
+    items.forEach(function (r) {
+      if (r.id !== id) return;
+      r.days = Array.isArray(r.days) ? r.days : [];
+      if (r.days.indexOf(today) !== -1) {
+        r.days = r.days.filter(function (d) { return d !== today; });
+      } else {
+        r.days.push(today);
+        gainXp("practice");
+      }
+    });
+    saveRoutines(items);
+    renderRoutines();
+  }
+
+  function deleteRoutine(id) {
+    if (!confirm("이 루틴을 지울까요?")) return;
+    saveRoutines(loadRoutines().filter(function (r) { return r.id !== id; }));
+    renderRoutines();
+  }
+
+  function weekCount(days) {
+    var from = Date.now() - 6 * 86400000;
+    return (days || []).filter(function (d) {
+      return new Date(d + "T00:00:00").getTime() >= dayStart(from);
+    }).length;
+  }
+
+  function renderRoutines() {
+    var list = $("routine-list");
+    if (!list) return;
+    var items = loadRoutines();
+    var today = dayKey(Date.now());
+    list.innerHTML = "";
+    items.forEach(function (r) {
+      var done = (r.days || []).indexOf(today) !== -1;
+      var li = el("li", "routine-item" + (done ? " is-done" : ""));
+
+      var check = el("button", "routine-check");
+      check.type = "button";
+      check.setAttribute("aria-pressed", String(done));
+      check.setAttribute("aria-label", r.title + (done ? " 완료됨" : " 체크하기"));
+      check.appendChild(el("span", "routine-box"));
+      check.appendChild(el("span", "routine-text", r.title));
+      check.addEventListener("click", function () { toggleRoutine(r.id); });
+      li.appendChild(check);
+
+      li.appendChild(el("span", "routine-meta", "이번 주 " + weekCount(r.days) + "일"));
+      var del = el("button", "btn btn-text btn-sm routine-del", "지우기");
+      del.type = "button";
+      del.addEventListener("click", function () { deleteRoutine(r.id); });
+      li.appendChild(del);
+
+      list.appendChild(li);
+    });
+    $("routine-empty").classList.toggle("is-hidden", items.length > 0);
   }
 
   /* ---------- 기록 탭 ---------- */
@@ -521,7 +632,7 @@
       box.innerHTML = "";
       if (!p) {
         box.appendChild(el("p", "empty-text",
-          "아직 정한 실천이 없어요. 패턴이나 상황 코칭에서 하나만 골라보세요."));
+          "아직 정한 실천이 없어요. 고민·문제 상담에서 하나만 골라보세요."));
         return;
       }
       box.appendChild(el("p", "bh-practice-title", p.title));
@@ -670,6 +781,12 @@
         }, "coach");
       });
       pc.appendChild(setBtn);
+      var routBtn = el("button", "btn btn-secondary", "매일 루틴에 추가");
+      routBtn.type = "button";
+      routBtn.addEventListener("click", function () {
+        addRoutine(u(data.practice.title), "coach");
+      });
+      pc.appendChild(routBtn);
       box.appendChild(pc);
     }
 
@@ -815,7 +932,10 @@
     renderPractice();
     var tab = "log";
     try { tab = sessionStorage.getItem("ddasoop.bh.tab") || "log"; } catch (e) {}
+    if (tab === "coach") tab = "log";
     setTab(tab);
+    // 메뉴를 누르면 항상 '일일 루틴'부터 연다 (고민 화면은 공유받았을 때만 바로 연다)
+    setTop("routine");
   }
 
   function init() {
@@ -823,6 +943,14 @@
 
     document.querySelectorAll(".bh-tab").forEach(function (b) {
       b.addEventListener("click", function () { setTab(b.dataset.tab); });
+    });
+    document.querySelectorAll(".top-tab").forEach(function (b) {
+      b.addEventListener("click", function () { setTop(b.dataset.top); });
+    });
+    $("routine-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var input = $("routine-input");
+      if (addRoutine(input.value, "manual")) input.value = "";
     });
     $("bh-save").addEventListener("click", saveRecord);
     $("bh-coach-form").addEventListener("submit", submitCoach);
@@ -843,7 +971,7 @@
   /* 카톡 등에서 '공유 → 따숲'으로 들어온 글을 상황 코칭에 채워 넣는다 */
   function openCoachWith(text) {
     render();
-    setTab("coach");
+    setTop("concern");
     var input = $("bh-coach-input");
     input.value = String(text || "").slice(0, 2000);
     $("bh-coach-count").textContent = String(input.value.length);

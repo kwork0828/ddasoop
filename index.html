@@ -28,9 +28,7 @@
     <span id="offline-badge" class="offline-badge is-hidden">오프라인</span>
     <nav class="header-nav" aria-label="주요 메뉴">
       <button type="button" data-go="dashboard">홈</button>
-      <button type="button" data-go="check">오늘 체크</button>
-      <button type="button" data-go="behavior">행동 코칭</button>
-      <button type="button" data-go="ai">마음 쉼터</button>
+      <button type="button" data-go="behavior">루틴·고민</button>
       <button type="button" data-go="settings">설정</button>
     </nav>
   </header>
@@ -205,14 +203,14 @@
       </div>
 
       <!-- 우리의 숲 -->
-      <div class="section-block">
-        <h2 class="section-title">우리의 숲</h2>
+      <details class="fold">
+        <summary class="fold-summary">우리의 숲 보기</summary>
         <div class="card card-tree">
           <div id="tree-art" class="tree-art"></div>
           <p class="tree-stage" id="tree-stage">씨앗을 심었어요</p>
           <p class="tree-desc" id="tree-desc">미션을 해낼 때마다 열매가 하나씩 맺혀요.</p>
         </div>
-      </div>
+      </details>
 
       <!-- 로딩 -->
       <div id="loading-box" class="card is-hidden">
@@ -242,11 +240,12 @@
         <button type="button" class="btn btn-secondary" id="btn-rest-today">
           오늘은 쉬어갈게요
         </button>
+        <button type="button" class="btn btn-secondary" data-go="check">오늘 체크 하기</button>
       </div>
 
       <!-- 마음 쉼터 안내 (AI 화면 진입 카드) -->
-      <div class="section-block">
-        <h2 class="section-title">마음 쉼터</h2>
+      <details class="fold">
+        <summary class="fold-summary">마음 쉼터 열기</summary>
         <div class="card">
           <p class="card-desc">
             오늘 부모님 마음은 어떠셨나요?<br>
@@ -256,7 +255,7 @@
             마음 한 줄 적기
           </button>
         </div>
-      </div>
+      </details>
 
       <!-- 오늘의 말씀 -->
       <div class="section-block">
@@ -445,18 +444,35 @@
     <!-- 화면 8 : 행동 코칭 (ABC 기록 · 패턴 · 상황 코칭)          -->
     <!-- ===================================================== -->
     <section id="view-behavior" class="view">
-      <h2 class="section-title">행동 코칭</h2>
-
-      <div class="card">
-        <h3 class="card-title">이번 주 실천 딱 1개</h3>
-        <div id="bh-practice" class="bh-practice"></div>
+      <div class="top-tabs" role="tablist" aria-label="루틴과 고민 메뉴">
+        <button type="button" class="top-tab is-current" data-top="routine" role="tab" aria-selected="true">일일 루틴</button>
+        <button type="button" class="top-tab" data-top="concern" role="tab" aria-selected="false">고민·문제</button>
       </div>
 
-      <div class="bh-tabs" role="tablist" aria-label="행동 코칭 메뉴">
-        <button type="button" class="bh-tab" data-tab="log" role="tab">기록</button>
-        <button type="button" class="bh-tab" data-tab="pattern" role="tab">패턴</button>
-        <button type="button" class="bh-tab" data-tab="coach" role="tab">상황 코칭</button>
-      </div>
+      <!-- 일일 루틴 -->
+      <div id="top-routine" class="top-panel">
+        <div class="card">
+          <h2 class="card-title">오늘 루틴</h2>
+          <p class="card-desc">매일 하는 것만 체크하세요. 고민 상담에서 받은 실천도 여기에 넣을 수 있어요.</p>
+          <ul id="routine-list" class="routine-list"></ul>
+          <p id="routine-empty" class="empty-text">아직 루틴이 없어요. 아래에 적거나 고민 상담에서 추가해 보세요.</p>
+          <form id="routine-form" class="routine-form" novalidate>
+            <label class="sr-only" for="routine-input">새 루틴</label>
+            <input type="text" id="routine-input" class="input-text" maxlength="60"
+              placeholder="예: 아침에 같이 양치하기" autocomplete="off">
+            <button type="submit" class="btn btn-secondary">추가</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">이번 주 실천 딱 1개</h3>
+          <div id="bh-practice" class="bh-practice"></div>
+        </div>
+
+        <div class="bh-tabs" role="tablist" aria-label="행동 기록 메뉴">
+          <button type="button" class="bh-tab" data-tab="log" role="tab">기록</button>
+          <button type="button" class="bh-tab" data-tab="pattern" role="tab">패턴</button>
+        </div>
 
       <!-- 기록 -->
       <div id="bh-panel-log" class="bh-panel" role="tabpanel">
@@ -506,10 +522,13 @@
         </div>
       </div>
 
-      <!-- 상황 코칭 -->
-      <div id="bh-panel-coach" class="bh-panel is-hidden" role="tabpanel">
+      </div>
+
+      <!-- 고민·문제 -->
+      <div id="top-concern" class="top-panel is-hidden">
+      <div id="bh-panel-coach" role="tabpanel">
         <p class="card-desc">
-          유치원 알림장, 음성메모 녹취, 카톡 내용을 그대로 붙여 넣으세요.<br>
+          고민이나 문제 상황을 적거나, 알림장·카톡 내용을 그대로 붙여 넣으세요.<br>
           ABC로 정리하고 가설, 이번 주 실천 1개, 선생님께 보낼 메시지까지 만들어 드려요.
         </p>
         <p class="card-desc bh-share-tip">
@@ -548,6 +567,8 @@
             <ul id="bh-coach-history" class="ai-history"></ul>
           </div>
         </div>
+      </div>
+
       </div>
 
       <p class="ai-note">

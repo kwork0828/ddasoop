@@ -1314,7 +1314,7 @@ select:focus-visible {
     bottom: 0;
     z-index: 60;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0;
     padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
     background: rgba(255, 255, 255, 0.97);
@@ -1811,4 +1811,152 @@ select:focus-visible {
   background: var(--forest-light);
   color: var(--forest-dark);
   word-break: keep-all;
+}
+
+/* ===== 간편 화면: 상단 탭(일일 루틴 / 고민·문제), 접는 메뉴, 루틴 체크 ===== */
+.top-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 6px;
+  margin-bottom: var(--gap);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.top-tab {
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.top-tab.is-current {
+  background: var(--forest);
+  color: #fff;
+}
+
+.routine-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.routine-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+}
+
+.routine-check {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.routine-box {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--forest);
+  border-radius: 8px;
+  background: #fff;
+  position: relative;
+}
+
+.routine-item.is-done .routine-box {
+  background: var(--forest);
+}
+
+.routine-item.is-done .routine-box::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 3px;
+  width: 7px;
+  height: 13px;
+  border: solid #fff;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+.routine-item.is-done .routine-text {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+.routine-meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.routine-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.fold {
+  margin-bottom: var(--gap);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.fold-summary {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--forest-dark);
+  cursor: pointer;
+  list-style: none;
+}
+
+.fold-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold-summary::after {
+  content: "+";
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--ink-soft);
+}
+
+.fold[open] .fold-summary::after {
+  content: "−";
+}
+
+.fold > .card,
+.fold > .btn,
+.fold > .section-block {
+  margin: 0 12px 12px;
 }
