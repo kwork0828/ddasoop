@@ -113,7 +113,7 @@ with sync_playwright() as p:
     expect(page.locator("#bh-practice")).to_contain_text("쉬어요")
 
     # 6) 상황 코칭: 이름 가리기 → 응답에서 이름 복원
-    page.click(".bh-tab[data-tab='coach']")
+    page.click(".top-tab[data-top='concern']")
     page.fill("#bh-coach-input", "오늘 유치원에서 시온이가 선생님이 시킨 걸 하기 싫었는지 종이를 찢고 지온이 식판에 침을 뱉었대요. 엄마 번호 010-1234-5678")
     page.fill("#bh-coach-names", "지온")
     sent = {}
@@ -134,6 +134,7 @@ with sync_playwright() as p:
     expect(page.locator("#bh-practice")).to_contain_text("쉬어요 카드")
 
     # 7) 실천 체크 → 대시보드 반영
+    page.click(".top-tab[data-top='routine']")
     page.click("#bh-practice >> text=했어요")
     expect(page.locator("#bh-practice .bh-practice-days")).to_contain_text("1일")
     page.click(".header-nav [data-go='dashboard']")
@@ -144,7 +145,7 @@ with sync_playwright() as p:
     page.route("**/api/coach", lambda r: r.fulfill(status=502, content_type="application/json",
                                                      body=json.dumps({"ok": False, "code": "UPSTREAM_ERROR", "message": "실패"})))
     page.click(".header-nav [data-go='behavior']")
-    page.click(".bh-tab[data-tab='coach']")
+    page.click(".top-tab[data-top='concern']")
     page.fill("#bh-coach-input", "마트에서 장난감 안 사준다고 30분 동안 드러누워 울었어요.")
     page.click("#bh-coach-submit")
     expect(page.locator("#bh-coach-result")).to_contain_text("기본 가이드", timeout=10000)
@@ -197,7 +198,7 @@ with sync_playwright() as p:
     page.click("#bh-save")
     expect(page.locator("#bh-insight")).to_be_visible()
     check("오프라인에서 기록 저장", True)
-    page.click(".bh-tab[data-tab='coach']")
+    page.click(".top-tab[data-top='concern']")
     page.fill("#bh-coach-input", "오프라인 상태에서 코칭을 눌러 봅니다. 열 글자 넘게.")
     page.click("#bh-coach-submit")
     expect(page.locator("#bh-coach-result")).to_contain_text("기본 가이드")

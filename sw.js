@@ -6,7 +6,7 @@
    - 배포할 때 VERSION 을 올리면 사용자 화면에 "업데이트" 버튼이 뜹니다.
    ============================================ */
 
-const VERSION = "2026-10-12.2";
+const VERSION = "2026-10-17.1";
 const CACHE = "ddasoop-" + VERSION;
 
 const SHELL = [
